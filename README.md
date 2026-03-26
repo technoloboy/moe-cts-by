@@ -102,6 +102,10 @@ xml_path: "{ROOT_DIR}/resource/go2/your-custom-scene.xml"
 - Terrain's composition are different(see code).
 - tracking reward are different (fixed sigma vs. dynamic sigma).
 
+## ToDo
+
+- Try using DelayedPDActuatorCfg to replace ActionManager-Level action delay implementation.
+
 ## Acknowledgements
 This repository would not exist without the following open-source projects:
 
