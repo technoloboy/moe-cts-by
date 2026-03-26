@@ -2,89 +2,145 @@
 
 ## Overview
 
-Train Unitree Go2 with MoE-CTS on IsaacLab and deploy it to MuJoCo.
 
-This is a reproduction version of [go2_rl_gym](https://github.com/wty-yy/go2_rl_gym) on RobotLab/IsaacLab.
+Trains the Unitree Go2 robot using MoE-CTS in IsaacLab and deploys the trained policy to MuJoCo for simulation transfer (Sim2Sim).
+
+It is a reproduction of [go2_rl_gym](https://github.com/wty-yy/go2_rl_gym), adapted to the RobotLab / IsaacLab ecosystem.
+
+---
+
+<p align="center">
+  <img src="resources/go2/isaaclab_scene.png" width="70%"/>
+</p>
+
+---
 
 ## Installation Guide
 
 ### 1. Install IsaacLab
+
 Install IsaacLab 2.3.0 release by following the [installation guide](https://isaac-sim.github.io/IsaacLab/release/2.3.0/source/setup/installation/pip_installation.html#).
 
-After installation, your environment should satisfy the following requirements:
-```
-isaacsim <= 5.1.0.0 # tested on 5.1.0.0
-isaaclab <= 0.53.1 # tested on 0.53.1
-isaaclab-rl <= 0.4.7 # tested on 0.4.7
+After installation, your environment should satisfies:
+
+```bash
+isaacsim <= 5.1.0.0   # tested on 5.1.0.0
+isaaclab <= 0.53.1    # tested on 0.53.1
+isaaclab-rl <= 0.4.7  # tested on 0.4.7
 ```
 
 Higher version may cause conflicts with our customized `rsl_rl==3.3.0` and `robot_lab==2.3.0`.
 
-### 2. Install customized RSL-RL and RobotLab
-We uses a customized version of `rsl_rl` and `robot_lab`. To install it, run the following commands:
+---
+
+### 2. Install Customized RSL-RL and RobotLab
+
+We uses a customized version of `rsl_rl` and `robot_lab`. Install them in editable mode:
 
 ```bash
 python -m pip install -e source/robot_lab
 python -m pip install -e source/rsl_rl
 ```
 
-### 3. Install MuJoCo for Sim2Sim (optional)
-If you want to use `mujoco` for Sim2Sim, install it by running the following command:
+---
+
+### 3. Install MuJoCo (Optional, for Sim2Sim)
+
+To enable MuJoCo-based simulation:
+
 ```bash
-pip install mujoco # tested on mujoco 3.4.0 & 3.6.0
+pip install mujoco  # tested on 3.4.0 and 3.6.0
 ```
 
-## Train and Play
+---
 
-Use the following commands to train and play:
+## Training and Evaluation
+
+Run the following commands:
 
 ```bash
 # Train
-python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Go2-v0 --headless
+python scripts/rsl_rl/train.py \
+    --task=RobotLab-Go2-v0 \
+    --headless
 
-# Play
-python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Go2-v0
+# Play / Evaluate
+python scripts/rsl_rl/play.py \
+    --task=RobotLab-Go2-v0
 ```
+
+---
 
 ## Configuration
 
-1. Modify `source/robot_lab/robot_lab/tasks/go2/env_cfg.py` for environment config.
+The training pipeline can be configured at two levels: task-level Python configuration files and runtime arguments passed to the training script.
 
-2. Modify `source/robot_lab/robot_lab/tasks/go2/rsl_rl_cfg.py` for algorithm config.
+### Task-Level Configuration
 
-3. Modify `source/robot_lab/robot_lab/tasks/go2/__init__.py` to add your own task with new config.
+The default task settings are defined in the following files:
 
-4. Add args in commands to override above configs, for example:
+1. **Environment configuration**
+   ```
+   source/robot_lab/robot_lab/tasks/go2/env_cfg.py
+   ```
 
-    ```
-    --experiment_name=moe_cts
-    --run_name=v1
-    --num_envs=16384
-    --resume
-    --checkpoint=path/to/your/checkpoint
-    ```
-    for more usage, see [robot_lab](https://github.com/fan-ziqi/robot_lab.git).
+2. **RL algorithm configuration**
+   ```
+   source/robot_lab/robot_lab/tasks/go2/rsl_rl_cfg.py
+   ```
+
+3. **Task registration**
+   ```
+   source/robot_lab/robot_lab/tasks/go2/__init__.py
+   ```
+
+### Runtime Overrides
+
+In addition to the default configuration files, `train.py` and `play.py` supports several command-line arguments for runtime overrides:
+
+```bash
+--experiment_name <YOUR_EXP_NAME>
+--run_name <YOUR_RUN_NAME>
+--num_envs <NUM_ENVS>
+--checkpoint <PATH_TO_CHECKPOINT>
+```
+
+For more details, refer to the [robot_lab repo](https://github.com/fan-ziqi/robot_lab.git).
+
+---
 
 ## MuJoCo Sim2Sim
 
-Use the following command to run the Sim2Sim with MuJoCo:
+Run the deployment script:
 
 ```bash
 python deploy/deploy_mujoco/deploy_go2.py
 ```
 
-- **Automatic detection**: When connecting the handle, the script automatically activates the handle control mode.
-- **Controller not available**: The script will use the default commands in the configuration file.
+### Controller Behavior
 
-Handle axis mapping:
+- **Automatic detection**: If a controller is connected, control mode is enabled automatically.
+- **Fallback mode**: If no controller is detected, default commands from the config file are used.
 
-- `LX/LY`: Forward/Lateral Speed Command
-- `RX`: Angular velocity (steering) command
+### Controller Mapping
 
-Modify the `xml_path` parameter in `deploy/deploy_mujoco/config/go2.yaml` to switch simulation scenarios:
+| Input | Function |
+|------|--------|
+| `LX / LY` | Forward / lateral velocity |
+| `RX` | Angular velocity (steering) |
+
+---
+
+### Switching Simulation Scenarios
+
+Modify `xml_path` in:
+
+```
+deploy/deploy_mujoco/config/go2.yaml
+```
 
 ```yaml
-# Flat
+# Flat terrain
 xml_path: "{ROOT_DIR}/resources/go2/flat.xml"
 
 # Stairs
@@ -94,17 +150,23 @@ xml_path: "{ROOT_DIR}/resources/go2/stairs.xml"
 xml_path: "{ROOT_DIR}/resources/go2/boxes.xml"
 
 # Custom
-xml_path: "{ROOT_DIR}/resource/go2/your-custom-scene.xml"
+xml_path: "{ROOT_DIR}/resources/go2/your-custom-scene.xml"
 ```
 
-## Differences with `go2_rl_gym`
+---
 
-- Terrain's composition are different(see code).
-- tracking reward are different (fixed sigma vs. dynamic sigma).
+## Differences from `go2_rl_gym`
 
-## ToDo
+- Different terrain composition
+- Different tracking reward formulation (fixed sigma vs. dynamic sigma)
 
-- Try using DelayedPDActuatorCfg to replace ActionManager-Level action delay implementation.
+---
+
+## TODO
+
+- Try replacing ActionManager-level delay with `DelayedPDActuatorCfg`
+
+---
 
 ## Acknowledgements
 This repository would not exist without the following open-source projects:
