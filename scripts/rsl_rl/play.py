@@ -23,7 +23,7 @@ from utils import export_cts_policy_as_jit, export_cts_policy_as_onnx
 # add argparse arguments
 parser = argparse.ArgumentParser(description="Train an RL agent with RSL-RL.")
 parser.add_argument("--video", action="store_true", default=False, help="Record videos during training.")
-parser.add_argument("--video_length", type=int, default=200, help="Length of the recorded video (in steps).")
+parser.add_argument("--video_length", type=int, default=int(1e9), help="Length of the recorded video (in steps).")
 parser.add_argument(
     "--disable_fabric", action="store_true", default=False, help="Disable fabric and use USD I/O operations."
 )
@@ -40,6 +40,7 @@ parser.add_argument(
 )
 parser.add_argument("--real-time", action="store_true", default=False, help="Run in real-time, if possible.")
 parser.add_argument("--keyboard", action="store_true", default=False, help="Whether to use keyboard.")
+parser.add_argument("--fix_commands", action="store_true", default=False, help="Fix the velocity commands.")
 # append RSL-RL cli arguments
 cli_args.add_rsl_rl_args(parser)
 # append AppLauncher cli args
@@ -81,6 +82,13 @@ from isaaclab_tasks.utils import get_checkpoint_path
 from isaaclab_tasks.utils.hydra import hydra_task_config
 import robot_lab.tasks  # noqa: F401
 
+def fix_commands(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg):
+    from isaaclab.managers import ObservationTermCfg as ObsTerm
+    num_envs = env_cfg.scene.num_envs
+    def fix(env):
+        return torch.tensor([1.0, 0.0, 0.0], device=env_cfg.sim.device).repeat(num_envs, 1)
+    env_cfg.observations.policy.velocity_commands = ObsTerm(func=fix)
+    env_cfg.observations.critic.velocity_commands = ObsTerm(func=fix)
 
 @hydra_task_config(args_cli.task, args_cli.agent)
 def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agent_cfg: RslRlBaseRunnerCfg):
@@ -125,6 +133,10 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     # set the log directory for the environment (works for all environment types)
     env_cfg.log_dir = log_dir
 
+    # fix velocity commands if specified
+    if args_cli.fix_commands:
+        fix_commands(env_cfg)
+
     # create isaac environment
     env = gym.make(args_cli.task, cfg=env_cfg, render_mode="rgb_array" if args_cli.video else None)
 
@@ -134,15 +146,18 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
 
     # wrap for video recording
     if args_cli.video:
-        video_kwargs = {
-            "video_folder": os.path.join(log_dir, "videos", "play"),
-            "step_trigger": lambda step: step == 0,
-            "video_length": args_cli.video_length,
-            "disable_logger": True,
-        }
-        print("[INFO] Recording videos during training.")
-        print_dict(video_kwargs, nesting=4)
-        env = gym.wrappers.RecordVideo(env, **video_kwargs)
+        import imageio
+        video_path = os.path.join(log_dir, "videos", "play", time.strftime("%Y-%m-%d_%H-%M-%S") + ".mp4")
+        writer = imageio.get_writer(video_path, fps=int(1/env.unwrapped.step_dt))
+        # video_kwargs = {
+        #     "video_folder": os.path.join(log_dir, "videos", "play"),
+        #     "step_trigger": lambda step: step == 0,
+        #     "video_length": args_cli.video_length,
+        #     "disable_logger": True,
+        # }
+        # print("[INFO] Recording videos during training.")
+        # print_dict(video_kwargs, nesting=4)
+        # env = gym.wrappers.RecordVideo(env, **video_kwargs)  # Store all frames into list is slow and memory-consuming, use imageio
 
     # wrap around environment for rsl-rl
     env = RslRlVecEnvWrapper(env, clip_actions=agent_cfg.clip_actions)
@@ -206,10 +221,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
             # reset recurrent states for episodes that have terminated
             policy_nn.reset(dones)
         if args_cli.video:
-            timestep += 1
-            # Exit the play loop after recording one video
-            if timestep == args_cli.video_length:
-                break
+            writer.append_data(env.env.render())
         # camera_follow(env)
 
         # time delay for real-time evaluation
@@ -220,6 +232,9 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     # close the simulator
     env.close()
 
+    # close the video writer
+    if args_cli.video:
+        writer.close()
 
 if __name__ == "__main__":
     # run the main function
