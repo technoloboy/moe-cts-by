@@ -19,7 +19,7 @@ It is a reproduction of [go2_rl_gym](https://github.com/wty-yy/go2_rl_gym), adap
 
 ### 1. Install IsaacLab
 
-Install IsaacLab 2.3.0 release by following the [installation guide](https://isaac-sim.github.io/IsaacLab/release/2.3.0/source/setup/installation/pip_installation.html#). Please make sure to clone the IsaacLab repository and perform the installation using the release/2.3.0 branch.
+Install IsaacLab v2.3.0 by following the [guide](https://isaac-sim.github.io/IsaacLab/v2.3.0/source/setup/quickstart.html#). Please make sure to clone the IsaacLab repository and perform the installation using the release/2.3.0 branch.
 
 After installation, your environment should satisfies:
 
