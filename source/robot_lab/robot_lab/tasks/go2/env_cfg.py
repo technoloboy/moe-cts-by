@@ -366,7 +366,7 @@ class RewardsCfg:
     # Thus, we need to use a smaller weight for the dof_acc_l2 term in Lab compared to Gym.
     dof_acc_l2 = RewTerm(
         func=mdp.joint_acc_l2, 
-        weight=-1.0e-7, # gym和lab的dof_acc reward实现尺度不一样，lab是physic step level的，由于l2对于离群值的敏感性会导致更大的惩罚
+        weight=-1.0e-7,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=JOINT_NAMES)}
     )
     joint_power = RewTerm(
@@ -419,6 +419,17 @@ class RewardsCfg:
             "command_threshold": 0.1,
         },
     )
+    joint_pos_penalty_l1 = RewTerm(
+        func=mdp.joint_pos_penalty_l1,
+        weight=-0.02,
+        params={
+            "command_name": "base_velocity",
+            "asset_cfg": SceneEntityCfg("robot", joint_names=".*_(thigh|calf)_joint"),
+            "stand_still_scale": 1.0,
+            "velocity_threshold": 0.1,
+            "command_threshold": 0.1,
+        },
+    )    
     
 @configclass
 class TerminationsCfg:

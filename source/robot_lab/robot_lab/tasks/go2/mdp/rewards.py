@@ -109,7 +109,7 @@ def stand_still(
     return reward
 
 
-def joint_pos_penalty(
+def joint_pos_penalty_l1(
     env: ManagerBasedRLEnv,
     command_name: str,
     asset_cfg: SceneEntityCfg,
@@ -123,14 +123,13 @@ def joint_pos_penalty(
     cmd = torch.linalg.norm(env.command_manager.get_command(command_name), dim=1)
     body_vel = torch.linalg.norm(asset.data.root_lin_vel_b[:, :2], dim=1)
     running_reward = torch.linalg.norm(
-        (asset.data.joint_pos[:, asset_cfg.joint_ids] - asset.data.default_joint_pos[:, asset_cfg.joint_ids]), dim=1
+        (asset.data.joint_pos[:, asset_cfg.joint_ids] - asset.data.default_joint_pos[:, asset_cfg.joint_ids]), dim=1, ord=1
     )
     reward = torch.where(
         torch.logical_or(cmd > command_threshold, body_vel > velocity_threshold),
         running_reward,
         stand_still_scale * running_reward,
     )
-    reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
     return reward
 
 
