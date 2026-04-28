@@ -266,20 +266,26 @@ class Logger:
             for repository_file_path in self.git_status_repos:
                 try:
                     repo = git.Repo(repository_file_path, search_parent_directories=True)
-                    t = repo.head.commit.tree
+                    commit = repo.head.commit
+                    t = commit.tree
                 except Exception:
                     print(f"Could not find git repository in {repository_file_path}. Skipping.")
                     continue
                 # Get the name of the repository
                 repo_name = pathlib.Path(repo.working_dir).name
                 diff_file_name = os.path.join(git_log_dir, f"{repo_name}.diff")
-                # Check if the diff file already exists
-                if os.path.isfile(diff_file_name):
-                    continue
                 # Write the diff file
                 print(f"Storing git diff for '{repo_name}' in: {diff_file_name}")
-                with open(diff_file_name, "x", encoding="utf-8") as f:
-                    content = f"--- git status ---\n{repo.git.status()} \n\n\n--- git diff ---\n{repo.git.diff(t)}"
+                with open(diff_file_name, "w", encoding="utf-8") as f:
+                    content = (
+                        "--- git commit ---\n"
+                        f"commit: {commit.hexsha}\n"
+                        f"author: {commit.author.name} <{commit.author.email}>\n"
+                        f"date: {commit.committed_datetime.isoformat()}\n"
+                        f"message:\n{commit.message.rstrip()}\n\n\n"
+                        f"--- git status ---\n{repo.git.status()} \n\n\n"
+                        f"--- git diff ---\n{repo.git.diff(t)}"
+                    )
                     f.write(content)
                 # Add the file path to the list of files to be uploaded
                 file_paths.append(diff_file_name)
