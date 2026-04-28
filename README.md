@@ -182,9 +182,10 @@ xml_path: "{ROOT_DIR}/resources/go2/your-custom-scene.xml"
 
 - Different tracking reward formulation (fixed sigma vs. dynamic sigma)
 - Different rewards:
-  - lower dof_acc_l2 weight in Lab due to physics-step level implementation and sensitivity to outliers
+  - lower joint_acc_l2 weight in Lab due to physics-step level implementation and sensitivity to outliers
   - extra joint_pos_penalty_l1 reward in Lab due to better performance
 - Lack domain_rand: randomize_motor_strength
+- Extra domain_rand: randomize_com_positions_other (lead to better performance)
 
 ---
 

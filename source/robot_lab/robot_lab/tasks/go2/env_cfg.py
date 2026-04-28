@@ -403,10 +403,10 @@ class RewardsCfg:
         weight=-1.0,
         params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_thigh|.*_calf"), "threshold": 5.0},
     )
-    dof_pos_limits = RewTerm(
-        func=mdp.dof_pos_limits,
+    joint_pos_limits = RewTerm(
+        func=mdp.joint_pos_limits,
         weight=-2.0,
-        params={"asset_cfg": SceneEntityCfg("robot")},
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=JOINT_NAMES)},
     )
     feet_regulation = RewTerm(
         func=mdp.feet_regulation,

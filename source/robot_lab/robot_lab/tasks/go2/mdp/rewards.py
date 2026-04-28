@@ -605,20 +605,3 @@ def feet_regulation(
     reward = (feet_xy_vel_w.pow(2).sum(dim=-1) * torch.exp(-feet_height / (0.025 * base_height_target))).sum(dim=-1)
 
     return reward
-
-def dof_pos_limits(
-    env: ManagerBasedRLEnv,
-    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
-) -> torch.Tensor:
-    asset = env.scene[asset_cfg.name]
-    
-    joint_pos = asset.data.joint_pos
-    joint_limits = asset.data.soft_joint_pos_limits
-
-    lower = joint_limits[..., 0]
-    upper = joint_limits[..., 1]
-
-    out_of_limits = -(joint_pos - lower).clamp(max=0.0)
-    out_of_limits += (joint_pos - upper).clamp(min=0.0)
-
-    return torch.sum(out_of_limits, dim=1)

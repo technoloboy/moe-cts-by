@@ -92,7 +92,7 @@ DEFAULT_TERRAIN_CFG = terrain_gen.TerrainGeneratorCfg(
 
 
 # -----------------------------------------------------------------------------
-# Gym-aligned terrain setup
+# Go2 Terrain setup
 # -----------------------------------------------------------------------------
 @height_field_to_mesh
 def wave_terrain(difficulty: float, cfg) -> np.ndarray:
