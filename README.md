@@ -1,11 +1,13 @@
-# go2_rl_robotlab
+<div align="center">
+	<h1 align="center">Go2 RL RobotLab</h1>
+</div>
 
 ## Overview
 
 
-Trains the Unitree Go2 robot using MoE-CTS in IsaacLab and deploys the trained policy to MuJoCo for simulation transfer (Sim2Sim).
+Train the Unitree Go2 robot with MoE-CTS in IsaacLab, and deploys policy to MuJoCo for Sim2Sim.
 
-It is a reproduction of [go2_rl_gym](https://github.com/wty-yy/go2_rl_gym), adapted to the RobotLab / IsaacLab ecosystem.
+It is a official reproduction of [go2_rl_gym](https://github.com/wty-yy/go2_rl_gym), adapted to the IsaacLab / RobotLab ecosystem.
 
 ---
 
