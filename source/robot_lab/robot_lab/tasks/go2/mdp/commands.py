@@ -107,9 +107,12 @@ class Go2RLGymCommand(CommandTerm):
         self.metrics["max_command_x"] = self.max_command_x
 
     def reset(self, env_ids: Sequence[int] | None = None):
+        if env_ids is None:
+            env_ids = torch.arange(self.num_envs, device=self.device)
         self.time_left[env_ids] = self.cfg.resampling_time
         self.commands_xy_accumulation[env_ids] = 0.0
         self.max_move_distance[env_ids] = 0.0
+        self.last_is_limit_vel[env_ids] = False
         return super().reset(env_ids)
         
     def _resample(self, env_ids: Sequence[int]):
