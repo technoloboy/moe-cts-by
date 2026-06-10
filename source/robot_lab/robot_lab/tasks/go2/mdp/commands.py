@@ -26,7 +26,7 @@ from __future__ import annotations  # For forward reference of type hints
 
 from typing import TYPE_CHECKING, Sequence
 if TYPE_CHECKING:  # Avoid circular import for type checking
-    from robot_lab.tasks.go2.env.go2_env import ActionDelayGo2Env
+    from robot_lab.tasks.go2.env.go2_env import Go2Env
 
 from itertools import product
 
@@ -44,9 +44,9 @@ from robot_lab.tasks.go2.mdp.utils import is_robot_on_terrain, sample_disjoint_i
 
 class Go2RLGymCommand(CommandTerm):
     cfg: Go2RLGymCommandCfg
-    _env: ActionDelayGo2Env
+    _env: Go2Env
     
-    def __init__(self, cfg: Go2RLGymCommandCfg, env: ActionDelayGo2Env):
+    def __init__(self, cfg: Go2RLGymCommandCfg, env: Go2Env):
         """Reference: https://github.com/wty-yy/go2_rl_gym/blob/master/legged_gym/envs/base/legged_robot.py
         LeggedRobot._resample_command() and LeggedRobot._post_physics_step_callback()
         """

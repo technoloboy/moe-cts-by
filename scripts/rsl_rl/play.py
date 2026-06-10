@@ -112,6 +112,7 @@ def fix_commands(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvC
             ang_vel_z=(fixed_ang_z, fixed_ang_z),
             heading=None,
         ),
+        debug_vis=True,
     )
     env_cfg.commands.base_velocity = fixed_cfg
 
