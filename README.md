@@ -4,7 +4,7 @@
 		<img src="https://img.shields.io/badge/Project-Page-green.svg" alt="Project Page"/>
 	</a>
 	<a href="https://robogauge.github.io/static/files/arxiv.pdf">
-		<img src="https://img.shields.io/badge/Paper-RSS%202025-blue.svg" alt="RSS 2025 Paper"/>
+		<img src="https://img.shields.io/badge/Paper-RSS%202026-blue.svg" alt="RSS 2026 Paper"/>
 	</a>
 	<a href="https://arxiv.org/abs/2602.00678">
 		<img src="https://img.shields.io/badge/arXiv-2602.00678-b31b1b.svg" alt="arXiv:2602.00678"/>
@@ -259,6 +259,7 @@ xml_path: "{ROOT_DIR}/resources/go2/your-custom-scene.xml"
 - Domain randomization: 
   - no randomized action delay, use motor-level delay instead
   - no motor strength randomization due to implementation constraints in Lab.
+- History length: 10 in Lab vs. 5 in Gym, due to better performance with longer history in Lab.
 
 ---
 
