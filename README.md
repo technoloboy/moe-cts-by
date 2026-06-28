@@ -73,12 +73,12 @@ It is an official [MoE-CTS](https://robogauge.github.io/static/files/arxiv.pdf) 
   <img src="resources/results/robogauge_compare.png" width="100%"/>
 </p>
 
-### Algorithm Results (Best of 150k training steps)
+### Algorithm Results (Best Checkpoint Results)
 
 | Model | Score | Tracking  | Safety  | Quality  | Level |
 | --- | --- | --- | --- | --- | --- |
-| go2_moe_cts (go2_rl_robotlab) | **0.6828** | **0.6785** | 0.7552 | **0.7645** | **8.17** |
-| go2_moe_cts (go2_rl_gym) | **0.6713** | 0.6669 | **0.7857** | 0.7392 | 7.85 |
+| go2_moe_cts (go2_rl_robotlab) | **0.6984** | **0.7055** | **0.8159** | **0.7693** | **8.30** |
+| go2_moe_cts (go2_rl_gym) | 0.6713 | 0.6669 | 0.7857 | 0.7392 | 7.85 |
 | [CTS](https://arxiv.org/pdf/2405.10830) vanilla | 0.5786 | 0.5755 | 0.7066 | 0.6624 | 6.83 |
 | [HIM](https://github.com/InternRobotics/HIMLoco) | 0.5379 | 0.5453 | 0.6476 | 0.6050 | 6.19 |
 | [DreamWaQ](https://arxiv.org/abs/2301.10602) | 0.5054 | 0.5105 | 0.6149 | 0.5730 | 5.74 |
@@ -251,16 +251,17 @@ xml_path: "{ROOT_DIR}/resources/go2/your-custom-scene.xml"
 ## Differences from `go2_rl_gym`
 
 - Motor:
-  - use official unitree motor model instead of simple PD controller
+  - use official unitree motor model instead of simple PD controller.
 - Rewards:
-  - different tracking reward form (fixed sigma vs. dynamic sigma)
-  - lower joint_acc_l2 weight in Lab due to physics-step level implementation and sensitivity to outliers
-  - extra joint_pos_penalty_l1 reward in Lab due to better performance
+  - 2x tracking reward weights due to better performance.
+  - different tracking reward form (fixed sigma vs. dynamic sigma).
+  - lower joint_acc_l2 weight in Lab due to physics-step level implementation and sensitivity to outliers.
+  - extra joint_pos_penalty_l1 reward in Lab due to better performance.
 - Domain randomization: 
-  - no randomized action delay, use motor-level delay instead
+  - no randomized action delay, use motor-level delay instead.
   - no motor strength randomization due to implementation constraints in Lab.
 - History length: 10 in Lab vs. 5 in Gym, due to better performance with longer history in Lab.
-
+- Terrain Difficulty: use lab's continuous difficulty levels.
 ---
 
 ## Acknowledgements
