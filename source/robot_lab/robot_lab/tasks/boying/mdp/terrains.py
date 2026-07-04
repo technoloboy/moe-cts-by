@@ -184,6 +184,7 @@ TERRAIN_CFG = Go2TerrainGeneratorCfg(
         "wave": with_slope_threshold(
             WaveTerrainCfg(
                 proportion=0.05,
+                amplitude_range=(0.05, 0.15),  # boying: reduced from (0.1, 0.28)
             ),
             10.0, # effectively disable slope correction for wave terrain
         ),
@@ -212,7 +213,7 @@ TERRAIN_CFG = Go2TerrainGeneratorCfg(
         "stairs_up": with_slope_threshold(
             terrain_gen.HfInvertedPyramidStairsTerrainCfg(
                 proportion=0.25,
-                step_height_range=(0.05, 0.257),
+                step_height_range=(0.05, 0.15),  # boying: reduced from (0.05, 0.257)
                 step_width=0.31,
                 platform_width=3.0,
             ),
@@ -221,7 +222,7 @@ TERRAIN_CFG = Go2TerrainGeneratorCfg(
         "stairs_down": with_slope_threshold(
             terrain_gen.HfPyramidStairsTerrainCfg(
                 proportion=0.10,
-                step_height_range=(0.05, 0.257),
+                step_height_range=(0.05, 0.15),  # boying: reduced from (0.05, 0.257)
                 step_width=0.31,
                 platform_width=3.0,
             ),
@@ -231,7 +232,7 @@ TERRAIN_CFG = Go2TerrainGeneratorCfg(
             terrain_gen.HfDiscreteObstaclesTerrainCfg(
                 proportion=0.20,
                 obstacle_width_range=(1.0, 2.0),
-                obstacle_height_range=(0.05, 0.275),
+                obstacle_height_range=(0.05, 0.15),  # boying: reduced from (0.05, 0.275)
                 num_obstacles=20,
                 platform_width=3.0,
             ),

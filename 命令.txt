@@ -4,20 +4,11 @@ python scripts/rsl_rl/train.py --task=RobotLab-Go2-v0 --headless --num_envs 4096
 
 pos = [0.0, 0.0, 0.34] # x,y,z [m]
 default_joint_angles = { # = target angles [rad] when action = 0.0
-    'FL_hip_joint': 0.,   # [rad]
-    'RL_hip_joint': 0.,   # [rad]
-    'FR_hip_joint': -0. ,  # [rad]
-    'RR_hip_joint': -0.,   # [rad]
-
-    'FL_thigh_joint': 0.8,     # [rad]
-    'RL_thigh_joint': 0.8,   # [rad]
-    'FR_thigh_joint': 0.8,     # [rad]
-    'RR_thigh_joint': 0.8,   # [rad]
-
-    'FL_calf_joint': -1.5,   # [rad]
-    'RL_calf_joint': -1.5,    # [rad]
-    'FR_calf_joint': -1.5,  # [rad]
-    'RR_calf_joint': -1.5,    # [rad]
+           ".*R_hip_joint": -0.1,                                                                                        
+           ".*L_hip_joint": 0.1,                                                                                         
+           "F[L,R]_thigh_joint": 0.8,                                                                                    
+           "R[L,R]_thigh_joint": 1.0,                                                                                    
+           ".*_calf_joint": -1.5, 
 }
 
 control_type = 'P'
@@ -33,3 +24,5 @@ ok,现在我需要你做的,是把'/home/wkl/Desktop/himloco-by/go2_rl_robotlab'
   单和迁移计划,注意是完全迁移过来,所有的配置全部相等对齐. 
 
 python scripts/rsl_rl/train.py --task=RobotLab-Boying-v0 --headless --num_envs 4096
+
+修改点：配置Boying初始关节角对齐Go2；

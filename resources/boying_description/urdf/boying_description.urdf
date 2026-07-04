@@ -93,18 +93,6 @@
           rgba="0.203921568627451 0.203921568627451 0.203921568627451 1" />
       </material>
     </visual>
-    <collision>
-      <origin xyz="0.240 0.0 0.0" rpy="0.000000 0.000000 0.000000" />
-      <geometry>
-        <box size="0.142 0.078 0.130" />
-      </geometry>
-    </collision> 
-    <collision>
-      <origin xyz="0.315000 0.000000 0.0" rpy="0.000000 0.000000 0.000000" />
-      <geometry>
-        <sphere radius="0.070000" />
-      </geometry>
-    </collision>
   </link>
   <joint
     name="head_joint"
