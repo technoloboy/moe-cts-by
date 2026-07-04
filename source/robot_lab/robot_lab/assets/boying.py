@@ -1,13 +1,19 @@
 # Copyright (c) 2024-2025 Ziqi Fan
 # SPDX-License-Identifier: Apache-2.0
 
-"""Configuration for Boying quadruped robot."""
+"""Configuration for Boying quadruped robot.
+
+The Boying robot uses ENCOS EC-A6408-P2-25 planetary gearbox actuators on all 12 joints.
+Motor parameters are derived from the ENCOS datasheet V3.14 and back-drive damping
+measurements.  See EncosActuatorCfg_A6408P225 in unitree_actuator.py for the full
+derivation notes.
+"""
 
 import isaaclab.sim as sim_utils
-from isaaclab.actuators import DCMotorCfg
 from isaaclab.assets.articulation import ArticulationCfg
 
 from robot_lab.assets import ISAACLAB_ASSETS_DATA_DIR
+from robot_lab.assets.unitree_actuator import EncosActuatorCfg_A6408P225
 
 BOYING_CFG = ArticulationCfg(
     spawn=sim_utils.UrdfFileCfg(
@@ -49,14 +55,14 @@ BOYING_CFG = ArticulationCfg(
     ),
     soft_joint_pos_limit_factor=0.9,
     actuators={
-        "legs": DCMotorCfg(
+        # EC-A6408-P2-25: 25:1 planetary, 60 Nm peak, 20 Nm rated @ 133 RPM
+        "legs": EncosActuatorCfg_A6408P225(
             joint_names_expr=[".*"],
-            effort_limit=60,
-            saturation_effort=60,
-            velocity_limit=30.0,
-            stiffness=60.0,
-            damping=4.5,
-            friction=0.0,
+            effort_limit=60.0,    # peak stall torque [Nm]; DelayedPDActuator has no saturation_effort
+            velocity_limit=15.60, # no-load output speed [rad/s] = 149 RPM
+            stiffness=60.0,       # PD position gain [Nm/rad]
+            damping=4.5,          # PD velocity gain [Nm·s/rad]
+            friction=0.0,         # joint coulomb friction (handled by Fs/Fd in T-N model)
         ),
     },
 )

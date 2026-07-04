@@ -23,6 +23,23 @@ ok,现在我需要你做的,是把'/home/wkl/Desktop/himloco-by/go2_rl_robotlab'
   ac lab变换为mjlab,然后训练的机器人对象从go2变成boying,'/home/wkl/Desktop/himloco-by/himloco-boying/src/assets/robots/boying'配置不变,ok,请你理解我交给你的任务,然后列一份迁移清   
   单和迁移计划,注意是完全迁移过来,所有的配置全部相等对齐. 
 
-python scripts/rsl_rl/train.py --task=RobotLab-Boying-v0 --headless --num_envs 4096
+# ---- 训练命令（当前有效，torch 2.7.0+cu128，GB10/sm_121）----
+# libnvrtc.so.13：系统 CUDA 13 的 nvrtc 原生支持 sm_121，覆盖 torch 内置的 libnvrtc.so.12
+# libgomp：解决 aarch64 libgomp 符号冲突
+
+LD_PRELOAD="/lib/aarch64-linux-gnu/libgomp.so.1:/home/dream/miniconda3/envs/by_rl_robotlab/lib/python3.11/site-packages/torch/lib/libgomp.so.1:/usr/local/cuda/targets/sbsa-linux/lib/libnvrtc-builtins.so.13.0.88:/usr/local/cuda/targets/sbsa-linux/lib/libnvrtc.so.13.0.88" \
+python scripts/rsl_rl/train.py --task=RobotLab-Boying-v0 --headless --num_envs 8192
+
+LD_PRELOAD="/lib/aarch64-linux-gnu/libgomp.so.1:/home/dream/miniconda3/envs/by_rl_robotlab/lib/python3.11/site-packages/torch/lib/libgomp.so.1:/usr/local/cuda/targets/sbsa-linux/lib/libnvrtc-builtins.so.13.0.88:/usr/local/cuda/targets/sbsa-linux/lib/libnvrtc.so.13.0.88" \
+python scripts/rsl_rl/train.py --task=RobotLab-Go2-v0 --headless --num_envs 8192
+
+# ---- torch 安装（cu128，aarch64）----
+pip install torch==2.7.0+cu128 torchvision torchaudio \
+    --index-url https://download.pytorch.org/whl/cu128
+
+# ---- 问题根因说明 ----
+# GPU GB10 = sm_121（Blackwell），torch cu128 wheel 只含 sm_120 的 libnvrtc.so.12
+# 系统 CUDA 13 的 libnvrtc.so.13 原生支持 sm_121，用 LD_PRELOAD 优先加载即可
+# cuda_arch_shim.so 和 TORCH_CUDA_ARCH_LIST 方案已废弃
 
 修改点：配置Boying初始关节角对齐Go2；

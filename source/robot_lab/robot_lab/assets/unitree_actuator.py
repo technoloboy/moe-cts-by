@@ -128,3 +128,46 @@ class UnitreeActuatorCfg_Go2HV(UnitreeActuatorCfg):
     Y1 = 20.2
     Y2 = 23.4
 
+
+@configclass
+class EncosActuatorCfg_A6408P225(UnitreeActuatorCfg):
+    """Actuator configuration for ENCOS EC-A6408-P2-25 planetary gearbox motor.
+
+    Motor specs (from ENCOS datasheet V3.14, section 4):
+      - Reduction ratio  : 25
+      - Rated voltage    : 48 V
+      - Rated torque     : 20 Nm @ 133 RPM (output)
+      - Peak torque      : 60 Nm (stall, short duration)
+      - Rated speed      : 133 RPM = 13.93 rad/s (output)
+      - No-load speed    : 149 RPM = 15.60 rad/s (output)
+      - Torque constant  : 2.35 Nm/A
+      - Rotor inertia    : 62 kgmm² (motor only)
+      - Efficiency       : 72% (average)
+
+    T-N curve derivation:
+      The rated operating point (20 Nm, 13.93 rad/s) is constrained to lie on the
+      linear drop segment.  Solving for X1 gives ~10.58 rad/s (~101 RPM), meaning the
+      motor delivers its full 60 Nm peak up to that speed, then drops linearly to 0 at
+      the no-load speed X2 = 15.60 rad/s.
+
+    Friction model (from 反驱阻尼 back-drive measurements):
+      - Breakaway (static) torque : ~1.6 Nm
+      - Steady-state at ~10 RPM  : ~1.05 Nm
+      - Steady-state at ~82 RPM  : ~1.80 Nm
+      Fitted: Fs=0.946 Nm, Fd=0.0995 Nm·s/rad, Va=0.05 rad/s
+    """
+    # T-N curve (output shaft, rad/s and Nm)
+    X1 = 10.58   # knee-point speed [rad/s]: ~101 RPM output
+    X2 = 15.60   # no-load speed   [rad/s]: 149 RPM output
+    Y1 = 60.0    # peak torque, same direction as velocity [Nm]
+    Y2 = 60.0    # peak torque, opposing velocity [Nm]
+
+    # Friction (back-drive damping, referred to output)
+    Fs = 0.946   # static friction  [Nm]
+    Fd = 0.0995  # dynamic friction [Nm·s/rad]
+    Va = 0.05    # activation velocity [rad/s]
+
+    # Motor delay (CAN @ 1 Mbps, similar latency to Go2)
+    min_delay: int = 0
+    max_delay: int = 4
+
