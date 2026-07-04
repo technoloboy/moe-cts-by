@@ -1,0 +1,36 @@
+python scripts/rsl_rl/train.py --task=RobotLab-Go2-v0 --headless --num_envs 4096 
+
+
+
+pos = [0.0, 0.0, 0.34] # x,y,z [m]
+default_joint_angles = { # = target angles [rad] when action = 0.0
+    'FL_hip_joint': 0.,   # [rad]
+    'RL_hip_joint': 0.,   # [rad]
+    'FR_hip_joint': -0. ,  # [rad]
+    'RR_hip_joint': -0.,   # [rad]
+
+    'FL_thigh_joint': 0.8,     # [rad]
+    'RL_thigh_joint': 0.8,   # [rad]
+    'FR_thigh_joint': 0.8,     # [rad]
+    'RR_thigh_joint': 0.8,   # [rad]
+
+    'FL_calf_joint': -1.5,   # [rad]
+    'RL_calf_joint': -1.5,    # [rad]
+    'FR_calf_joint': -1.5,  # [rad]
+    'RR_calf_joint': -1.5,    # [rad]
+}
+
+control_type = 'P'
+stiffness = {'joint': 60.}  # [N*m/rad]
+damping = {'joint': 4.5}     # [N*m*s/rad]
+# action scale: target angle = actionScale * action + defaultAngle
+action_scale = 0.25
+# decimation: Number of control action updates @ sim DT per policy DT
+decimation = 4
+
+ok,现在我需要你做的,是把'/home/wkl/Desktop/himloco-by/go2_rl_robotlab'项目中的go2的整个训练算法(moe-cts)迁移到'/home/wkl/Desktop/himloco-by/himloco-boying'中,并且,训练环境从isa
+  ac lab变换为mjlab,然后训练的机器人对象从go2变成boying,'/home/wkl/Desktop/himloco-by/himloco-boying/src/assets/robots/boying'配置不变,ok,请你理解我交给你的任务,然后列一份迁移清   
+  单和迁移计划,注意是完全迁移过来,所有的配置全部相等对齐. 
+
+
+python scripts/rsl_rl/train.py --task=RobotLab-Boying-v0 --headless --num_envs 4096
