@@ -43,7 +43,7 @@ BOYING_CFG = ArticulationCfg(
         ),
     ),
     init_state=ArticulationCfg.InitialStateCfg(
-        pos=(0.0, 0.0, 0.34),
+        pos=(0.0, 0.0, 0.42),
         joint_pos={
             ".*R_hip_joint": -0.1,
             ".*L_hip_joint": 0.1,
@@ -56,13 +56,21 @@ BOYING_CFG = ArticulationCfg(
     soft_joint_pos_limit_factor=0.9,
     actuators={
         # EC-A6408-P2-25: 25:1 planetary, 60 Nm peak, 20 Nm rated @ 133 RPM
-        "legs": EncosActuatorCfg_A6408P225(
-            joint_names_expr=[".*"],
-            effort_limit=60.0,    # peak stall torque [Nm]; DelayedPDActuator has no saturation_effort
+        "hip_thigh": EncosActuatorCfg_A6408P225(
+            joint_names_expr=[".*_hip_joint", ".*_thigh_joint"],
+            effort_limit=60.0,    # peak stall torque [Nm]
             velocity_limit=15.60, # no-load output speed [rad/s] = 149 RPM
             stiffness=60.0,       # PD position gain [Nm/rad]
-            damping=4.5,          # PD velocity gain [Nm·s/rad]
+            damping=2.0,          # PD velocity gain [Nm·s/rad]; 4.5 exceeded peak torque at rated speed
             friction=0.0,         # joint coulomb friction (handled by Fs/Fd in T-N model)
+        ),
+        "calf": EncosActuatorCfg_A6408P225(
+            joint_names_expr=[".*_calf_joint"],
+            effort_limit=60.0,    # peak stall torque [Nm]
+            velocity_limit=10.4,  # calf URDF velocity limit [rad/s] (lower than hip/thigh)
+            stiffness=60.0,       # PD position gain [Nm/rad]
+            damping=2.0,          # PD velocity gain [Nm·s/rad]
+            friction=0.0,
         ),
     },
 )
