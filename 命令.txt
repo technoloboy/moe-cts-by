@@ -42,4 +42,6 @@ pip install torch==2.7.0+cu128 torchvision torchaudio \
 # 系统 CUDA 13 的 libnvrtc.so.13 原生支持 sm_121，用 LD_PRELOAD 优先加载即可
 # cuda_arch_shim.so 和 TORCH_CUDA_ARCH_LIST 方案已废弃
 
+python scripts/rsl_rl/play.py --task=RobotLab-Boying-v0
+
 修改点：配置Boying初始关节角对齐Go2；
