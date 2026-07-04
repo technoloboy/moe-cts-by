@@ -108,7 +108,7 @@
   </link>
   <joint
     name="head_joint"
-    type="fixed">
+    type="fixed" dont_collapse="true">
     <origin
       xyz="0 0 0"
       rpy="0 0 0" />
@@ -545,14 +545,14 @@
         xyz="0.071926 0.000000 -0.037864"
         rpy="0 0 0" />
       <mass
-        value="0.051104" />
+        value="0.137980" />
       <inertia
-        ixx="0.000079"
+        ixx="0.000214"
         ixy="0.000000"
-        ixz="0.000125"
-        iyy="0.000305"
+        ixz="0.000338"
+        iyy="0.000824"
         iyz="0.000000"
-        izz="0.000228" />
+        izz="0.000616" />
     </inertial>
     <visual>
       <origin
@@ -1037,14 +1037,14 @@
         xyz="0.071926 0.000000 -0.037864"
         rpy="0 0 0" />
       <mass
-        value="0.051104" />
+        value="0.137980" />
       <inertia
-        ixx="0.000079"
+        ixx="0.000214"
         ixy="0.000000"
-        ixz="0.000125"
-        iyy="0.000305"
+        ixz="0.000338"
+        iyy="0.000824"
         iyz="0.000000"
-        izz="0.000228" />
+        izz="0.000616" />
     </inertial>
     <visual>
       <origin
