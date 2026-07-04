@@ -61,7 +61,7 @@ BOYING_CFG = ArticulationCfg(
             effort_limit=60.0,    # peak stall torque [Nm]
             velocity_limit=15.60, # no-load output speed [rad/s] = 149 RPM
             stiffness=60.0,       # PD position gain [Nm/rad]
-            damping=2,          # PD velocity gain [Nm·s/rad]; 4.5 exceeded peak torque at rated speed
+            damping=4.5,          # PD velocity gain [Nm·s/rad]; 4.5 exceeded peak torque at rated speed
             friction=0.0,         # joint coulomb friction (handled by Fs/Fd in T-N model)
         ),
         "calf": EncosActuatorCfg_A6408P225(
@@ -69,7 +69,7 @@ BOYING_CFG = ArticulationCfg(
             effort_limit=60.0,    # peak stall torque [Nm]
             velocity_limit=10.4,  # calf URDF velocity limit [rad/s] (lower than hip/thigh)
             stiffness=60.0,       # PD position gain [Nm/rad]
-            damping=2,          # PD velocity gain [Nm·s/rad]
+            damping=4.5,          # PD velocity gain [Nm·s/rad]
             friction=0.0,
         ),
     },
