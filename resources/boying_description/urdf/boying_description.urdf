@@ -138,12 +138,6 @@
           rgba="0.698039215686274 0.698039215686274 0.698039215686274 1" />
       </material>
     </visual>
-    <collision>
-      <origin xyz="0.0 0.0 0.150" rpy="0.000000 0.000000 0.000000" />
-      <geometry>
-        <box size="0.180 0.320 0.140" />
-      </geometry>
-    </collision> 
   </link>
   <joint
     name="hm_joint"

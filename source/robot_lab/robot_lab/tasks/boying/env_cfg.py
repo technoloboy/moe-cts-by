@@ -29,7 +29,7 @@ JOINT_NAMES = [
 
 BASE_LINK_NAME = "base"
 FOOT_LINK_NAME = ".*_foot"
-BASE_HEIGHT_TARGET = 0.34
+BASE_HEIGHT_TARGET = 0.35
 
 
 @configclass
@@ -432,7 +432,7 @@ class TerminationsCfg:
         func=mdp.illegal_contact,
         params={
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=BASE_LINK_NAME),
-            "threshold": 1.0,
+            "threshold": 5.0,
         },
     )
 
