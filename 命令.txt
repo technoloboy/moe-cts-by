@@ -2,7 +2,7 @@ python scripts/rsl_rl/train.py --task=RobotLab-Go2-v0 --headless --num_envs 4096
 
 
 
-pos = [0.0, 0.0, 0.34] # x,y,z [m]
+pos = [0.0, 0.0, 0.42] # x,y,z [m]
 default_joint_angles = { # = target angles [rad] when action = 0.0
            ".*R_hip_joint": -0.1,                                                                                        
            ".*L_hip_joint": 0.1,                                                                                         

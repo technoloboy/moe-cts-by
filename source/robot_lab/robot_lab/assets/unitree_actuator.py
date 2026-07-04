@@ -163,8 +163,8 @@ class EncosActuatorCfg_A6408P225(UnitreeActuatorCfg):
     Y2 = 60.0    # peak torque, opposing velocity [Nm]
 
     # Friction (back-drive damping, referred to output)
-    Fs = 0.946   # static friction  [Nm]
-    Fd = 0.0995  # dynamic friction [Nm·s/rad]
+    Fs = 0.0    # static friction  [Nm]
+    Fd = 0.0    # dynamic friction [Nm·s/rad]
     Va = 0.05    # activation velocity [rad/s]
 
     # Motor delay (CAN @ 1 Mbps, similar latency to Go2)
