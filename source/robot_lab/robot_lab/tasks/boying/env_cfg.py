@@ -358,7 +358,7 @@ class RewardsCfg:
     ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.05)
     joint_acc_l2 = RewTerm(
         func=mdp.joint_acc_l2,
-        weight=-1.0e-6,
+        weight=-1.0e-7,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=JOINT_NAMES)},
     )
     joint_power = RewTerm(
@@ -381,7 +381,7 @@ class RewardsCfg:
         },
     )
     action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.01)
-    action_smoothness_l2 = RewTerm(func=mdp.action_smoothness_l2, weight=-0.02)
+    action_smoothness_l2 = RewTerm(func=mdp.action_smoothness_l2, weight=-0.01)
     undesired_contacts = RewTerm(
         func=mdp.undesired_contacts,
         weight=-1.0,
