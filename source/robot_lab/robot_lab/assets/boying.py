@@ -18,7 +18,7 @@ from robot_lab.assets.unitree_actuator import EncosActuatorCfg_A6408P225
 BOYING_CFG = ArticulationCfg(
     spawn=sim_utils.UrdfFileCfg(
         fix_base=False,
-        merge_fixed_joints=False,
+        merge_fixed_joints=True,
         replace_cylinders_with_capsules=True,
         asset_path=f"{ISAACLAB_ASSETS_DATA_DIR}/boying_description/urdf/boying_description.urdf",
         activate_contact_sensors=True,

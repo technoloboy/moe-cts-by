@@ -96,7 +96,8 @@
   </link>
   <joint
     name="head_joint"
-    type="fixed">
+    type="fixed"
+    dont_collapse="true">
     <origin
       xyz="0 0 0"
       rpy="0 0 0" />
@@ -310,21 +311,21 @@
       </material>
     </visual>
     <collision>
-      <origin xyz="0.0514 0.000000 -0.02650" rpy="0.000000 -1.26 0.000000" />
+      <origin xyz="0.0504 0.000000 -0.0262" rpy="0.000000 -1.26 0.000000" />
       <geometry>
-        <cylinder radius="0.01500" length="0.1000" />
+        <cylinder radius="0.01500" length="0.0979" />
       </geometry>
     </collision>
     <collision>
-      <origin xyz="0.127 0.000000 -0.056" rpy="0.000000 -0.995 0.000000" />
+      <origin xyz="0.1219 0.000000 -0.0621" rpy="0.000000 -0.995 0.000000" />
       <geometry>
-        <cylinder radius="0.014000" length="0.074000" />
+        <cylinder radius="0.014000" length="0.0647" />
       </geometry>
     </collision>
     <collision>
-      <origin xyz="0.17 0.000000 -0.102" rpy="0.000000 -0.559 0.000000" />
+      <origin xyz="0.1619 0.000000 -0.1070" rpy="0.000000 -0.559 0.000000" />
       <geometry>
-        <cylinder radius="0.018" length="0.057" />
+        <cylinder radius="0.018" length="0.0564" />
       </geometry>
     </collision>
   </link>
@@ -385,7 +386,8 @@
   </link>
   <joint
     name="FL_foot_joint"
-    type="fixed">
+    type="fixed"
+    dont_collapse="true">
     <origin
       xyz="0 0 0"
       rpy="0 0 0" />
@@ -549,21 +551,21 @@
       </material>
     </visual>
     <collision>
-      <origin xyz="0.0514 0.000000 -0.02650" rpy="0.000000 -1.26 0.000000" />
+      <origin xyz="0.0504 0.000000 -0.0262" rpy="0.000000 -1.26 0.000000" />
       <geometry>
-        <cylinder radius="0.01500" length="0.1000" />
+        <cylinder radius="0.01500" length="0.0979" />
       </geometry>
     </collision>
     <collision>
-      <origin xyz="0.127 0.000000 -0.056" rpy="0.000000 -0.995 0.000000" />
+      <origin xyz="0.1219 0.000000 -0.0621" rpy="0.000000 -0.995 0.000000" />
       <geometry>
-        <cylinder radius="0.014000" length="0.074000" />
+        <cylinder radius="0.014000" length="0.0647" />
       </geometry>
     </collision>
     <collision>
-      <origin xyz="0.17 0.000000 -0.102" rpy="0.000000 -0.559 0.000000" />
+      <origin xyz="0.1619 0.000000 -0.1070" rpy="0.000000 -0.559 0.000000" />
       <geometry>
-        <cylinder radius="0.018" length="0.057" />
+        <cylinder radius="0.018" length="0.0564" />
       </geometry>
     </collision>
   </link>
@@ -586,7 +588,7 @@
       velocity="10.4" />
   </joint>
   <link
-    name="R_foot">
+    name="FR_foot">
     <inertial>
       <origin
         xyz="0.179831 -0.000228 -0.134863"
@@ -623,15 +625,16 @@
     </collision>
   </link>
   <joint
-    name="R_foot_joint"
-    type="fixed">
+    name="FR_foot_joint"
+    type="fixed"
+    dont_collapse="true">
     <origin
       xyz="0 0 0"
       rpy="0 0 0" />
     <parent
       link="FR_calf" />
     <child
-      link="R_foot" />
+      link="FR_foot" />
     <axis
       xyz="0 0 0" />
   </joint>
@@ -788,21 +791,21 @@
       </material>
     </visual>
     <collision>
-      <origin xyz="0.0514 0.000000 -0.02650" rpy="0.000000 -1.26 0.000000" />
+      <origin xyz="0.0504 0.000000 -0.0262" rpy="0.000000 -1.26 0.000000" />
       <geometry>
-        <cylinder radius="0.01500" length="0.1000" />
+        <cylinder radius="0.01500" length="0.0979" />
       </geometry>
     </collision>
     <collision>
-      <origin xyz="0.127 0.000000 -0.056" rpy="0.000000 -0.995 0.000000" />
+      <origin xyz="0.1219 0.000000 -0.0621" rpy="0.000000 -0.995 0.000000" />
       <geometry>
-        <cylinder radius="0.014000" length="0.074000" />
+        <cylinder radius="0.014000" length="0.0647" />
       </geometry>
     </collision>
     <collision>
-      <origin xyz="0.17 0.000000 -0.102" rpy="0.000000 -0.559 0.000000" />
+      <origin xyz="0.1619 0.000000 -0.1070" rpy="0.000000 -0.559 0.000000" />
       <geometry>
-        <cylinder radius="0.018" length="0.057" />
+        <cylinder radius="0.018" length="0.0564" />
       </geometry>
     </collision>
   </link>
@@ -863,7 +866,8 @@
   </link>
   <joint
     name="RL_foot_joint"
-    type="fixed">
+    type="fixed"
+    dont_collapse="true">
     <origin
       xyz="0 0 0"
       rpy="0 0 0" />
@@ -1027,21 +1031,21 @@
       </material>
     </visual>
     <collision>
-      <origin xyz="0.0514 0.000000 -0.02650" rpy="0.000000 -1.26 0.000000" />
+      <origin xyz="0.0504 0.000000 -0.0262" rpy="0.000000 -1.26 0.000000" />
       <geometry>
-        <cylinder radius="0.01500" length="0.1000" />
+        <cylinder radius="0.01500" length="0.0979" />
       </geometry>
     </collision>
     <collision>
-      <origin xyz="0.127 0.000000 -0.056" rpy="0.000000 -0.995 0.000000" />
+      <origin xyz="0.1219 0.000000 -0.0621" rpy="0.000000 -0.995 0.000000" />
       <geometry>
-        <cylinder radius="0.014000" length="0.074000" />
+        <cylinder radius="0.014000" length="0.0647" />
       </geometry>
     </collision>
     <collision>
-      <origin xyz="0.17 0.000000 -0.102" rpy="0.000000 -0.559 0.000000" />
+      <origin xyz="0.1619 0.000000 -0.1070" rpy="0.000000 -0.559 0.000000" />
       <geometry>
-        <cylinder radius="0.018" length="0.057" />
+        <cylinder radius="0.018" length="0.0564" />
       </geometry>
     </collision>
   </link>
@@ -1102,7 +1106,8 @@
   </link>
   <joint
     name="RR_foot_joint"
-    type="fixed">
+    type="fixed"
+    dont_collapse="true">
     <origin
       xyz="0 0 0"
       rpy="0 0 0" />
