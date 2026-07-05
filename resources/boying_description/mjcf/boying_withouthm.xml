@@ -69,7 +69,7 @@
           <geom class="collision" size="0.022 0.085" pos="-0.02 0.127 -0.1063" type="cylinder" rgba="0.86667 0.9098 1 1"/>
           <geom class="collision" size="0.025 0.0275" pos="-0.006 0.127 -0.219" quat="0.973894 0 -0.227004 0" type="cylinder" rgba="0.86667 0.9098 1 1"/>
           <body name="FL_calf" pos="0 0.1267 -0.235" quat="0.894493 0 0.447082 0">
-            <inertial pos="0.101823 6.31718e-05 -0.0647394" quat="0.320902 0.630731 0.628578 0.32263" mass="0.190862" diaginertia="0.00164183 0.00160675 5.20806e-05"/>
+            <inertial pos="0.071926 0 -0.037864" quat="0.180810 0.180810 -0.683599 0.683599" mass="0.137980" diaginertia="0.000022 0.000808 0.000824"/>
             <joint name="FL_calf_joint" pos="0 0 0" axis="0 1 0" range="-2.7478 -0.9269" actuatorfrcrange="-60 60"/>
             <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.86667 0.9098 1 1" mesh="L_calf"/>
             <geom class="collision" size="0.015 0.05" pos="0.0514 0 -0.0265" quat="0.808028 0 -0.589145 0" type="cylinder" rgba="0.86667 0.9098 1 1"/>
@@ -94,7 +94,7 @@
           <geom class="collision" size="0.022 0.085" pos="-0.02 -0.127 -0.1063" type="cylinder" rgba="1 1 1 1"/>
           <geom class="collision" size="0.025 0.0275" pos="-0.006 -0.127 -0.219" quat="0.973894 0 -0.227004 0" type="cylinder" rgba="1 1 1 1"/>
           <body name="FR_calf" pos="0 -0.1267 -0.235" quat="0.894493 0 0.447082 0">
-            <inertial pos="0.126802 -0.00011595 -0.0871932" quat="0.312639 0.63358 0.635832 0.310726" mass="0.103987" diaginertia="0.000865132 0.000849365 2.87672e-05"/>
+            <inertial pos="0.071926 0 -0.037864" quat="0.180810 0.180810 -0.683599 0.683599" mass="0.137980" diaginertia="0.000022 0.000808 0.000824"/>
             <joint name="FR_calf_joint" pos="0 0 0" axis="0 1 0" range="-2.7478 -0.9269" actuatorfrcrange="-60 60"/>
             <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="R_calf"/>
             <geom class="collision" size="0.015 0.05" pos="0.0514 0 -0.0265" quat="0.808028 0 -0.589145 0" type="cylinder" rgba="1 1 1 1"/>
@@ -119,7 +119,7 @@
           <geom class="collision" size="0.022 0.085" pos="-0.02 0.127 -0.1063" type="cylinder" rgba="0.86667 0.9098 1 1"/>
           <geom class="collision" size="0.025 0.0275" pos="-0.006 0.127 -0.219" quat="0.973894 0 -0.227004 0" type="cylinder" rgba="0.86667 0.9098 1 1"/>
           <body name="RL_calf" pos="0 0.1267 -0.235" quat="0.894493 0 0.447082 0">
-            <inertial pos="0.101823 6.31718e-05 -0.0647394" quat="0.320902 0.630731 0.628578 0.32263" mass="0.190862" diaginertia="0.00164183 0.00160675 5.20806e-05"/>
+            <inertial pos="0.071926 0 -0.037864" quat="0.180810 0.180810 -0.683599 0.683599" mass="0.137980" diaginertia="0.000022 0.000808 0.000824"/>
             <joint name="RL_calf_joint" pos="0 0 0" axis="0 1 0" range="-2.7478 -0.9269" actuatorfrcrange="-60 60"/>
             <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.86667 0.9098 1 1" mesh="L_calf"/>
             <geom class="collision" size="0.015 0.05" pos="0.0514 0 -0.0265" quat="0.808028 0 -0.589145 0" type="cylinder" rgba="0.86667 0.9098 1 1"/>
@@ -144,7 +144,7 @@
           <geom class="collision" size="0.022 0.085" pos="-0.02 -0.127 -0.1063" type="cylinder" rgba="1 1 1 1"/>
           <geom class="collision" size="0.025 0.0275" pos="-0.006 -0.127 -0.219" quat="0.973894 0 -0.227004 0" type="cylinder" rgba="1 1 1 1"/>
           <body name="RR_calf" pos="0 -0.1267 -0.235" quat="0.894493 0 0.447082 0">
-            <inertial pos="0.126802 -0.00011595 -0.0871932" quat="0.312639 0.63358 0.635832 0.310726" mass="0.103987" diaginertia="0.000865132 0.000849365 2.87672e-05"/>
+            <inertial pos="0.071926 0 -0.037864" quat="0.180810 0.180810 -0.683599 0.683599" mass="0.137980" diaginertia="0.000022 0.000808 0.000824"/>
             <joint name="RR_calf_joint" pos="0 0 0" axis="0 1 0" range="-2.7478 -0.9269" actuatorfrcrange="-60 60"/>
             <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="R_calf"/>
             <geom class="collision" size="0.015 0.05" pos="0.0514 0 -0.0265" quat="0.808028 0 -0.589145 0" type="cylinder" rgba="1 1 1 1"/>
@@ -223,7 +223,7 @@
   </sensor>
 
   <keyframe>
-    <key name="home" qpos="0 0 0.27 1 0 0 0 0 0.9 -1.8 0 0.9 -1.8 0 0.9 -1.8 0 0.9 -1.8"
-      ctrl="0 0.9 -1.8 0 0.9 -1.8 0 0.9 -1.8 0 0.9 -1.8" />
+    <key name="home" qpos="0 0 0.27 1 0 0 0 0 0.8 -1.5 0 0.8 -1.5 0 0.8 -1.5 0 0.8 -1.5"
+      ctrl="0 0.8 -1.5 0 0.8 -1.5 0 0.8 -1.5 0 0.8 -1.5" />
   </keyframe>
 </mujoco>
