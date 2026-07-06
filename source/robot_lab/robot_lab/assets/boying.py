@@ -53,7 +53,7 @@ BOYING_CFG = ArticulationCfg(
         },
         joint_vel={".*": 0.0},
     ),
-    soft_joint_pos_limit_factor=0.9,
+    soft_joint_pos_limit_factor=0.95,
     actuators={
         # EC-A6408-P2-25: 25:1 planetary, 60 Nm peak, 20 Nm rated @ 133 RPM
         "hip_thigh": EncosActuatorCfg_A6408P225(

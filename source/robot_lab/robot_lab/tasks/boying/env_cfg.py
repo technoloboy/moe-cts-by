@@ -40,7 +40,7 @@ class BoyingSceneCfg(InteractiveSceneCfg):
         prim_path="/World/ground",
         terrain_type="generator",
         terrain_generator=TERRAIN_CFG,
-        max_init_terrain_level=5,
+        max_init_terrain_level=3,
         collision_group=-1,
         physics_material=sim_utils.RigidBodyMaterialCfg(
             friction_combine_mode="average",
@@ -355,7 +355,7 @@ class RewardsCfg:
         params={"command_name": "base_velocity", "std": 0.5},
     )
     lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_l2, weight=-2.0)
-    ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.05)
+    ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.1)
     joint_acc_l2 = RewTerm(
         func=mdp.joint_acc_l2,
         weight=-1.0e-7,
@@ -445,7 +445,7 @@ class CurriculumCfg:
         "term_name": "lin_vel_z_l2", "initial_weight": -2.0, "final_weight": -0.0, "start_it": 0, "end_it": 1500,
     })
     base_height_l2 = CurrTerm(mdp.gradual_reward_weight_modification, params={
-        "term_name": "base_height_l2", "initial_weight": -1.0, "final_weight": -10.0, "start_it": 0, "end_it": 5000,
+        "term_name": "base_height_l2", "initial_weight": -1.0, "final_weight": -5.0, "start_it": 0, "end_it": 10000,
     })
 
 
