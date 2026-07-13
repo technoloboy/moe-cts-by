@@ -307,12 +307,12 @@ class Go2RLGymCommandCfg(CommandTermCfg):
     zero_command_curriculum: dict = {'start_iter': 0, 'end_iter': 1500, 'start_value': 0.0, 'end_value': 0.1}
     limit_vel: dict = {"lin_vel_x": [-1, 1], "lin_vel_y": [-1, 1], "ang_vel_yaw": [-1, 0, 1]}
     command_range_curriculum: list[dict] = [{
-        'iter': 20000,
+        'iter': 50000,
         'lin_vel_x': [-1.0, 1.0],
         'lin_vel_y': [-1.0, 1.0],
         'ang_vel_yaw': [-1.5, 1.5],
     }, {
-        'iter': 50000,
+        'iter': 100000,
         'lin_vel_x': [-2.0, 2.0],
         'lin_vel_y': [-1.0, 1.0],
         'ang_vel_yaw': [-2.0, 2.0],
