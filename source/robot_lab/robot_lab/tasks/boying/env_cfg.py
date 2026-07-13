@@ -347,7 +347,7 @@ class RewardsCfg:
     track_lin_vel_xy_exp = RewTerm(
         func=mdp.track_lin_vel_xy_exp,
         weight=2.0,
-        params={"command_name": "base_velocity", "std": 0.5},
+        params={"command_name": "base_velocity", "std": 0.35},  # was 0.5; sharpened for Boying's ~1.5 m/s max speed
     )
     track_ang_vel_z_exp = RewTerm(
         func=mdp.track_ang_vel_z_exp,
@@ -363,12 +363,12 @@ class RewardsCfg:
     )
     joint_power = RewTerm(
         func=mdp.joint_power,
-        weight=-2e-5,
+        weight=-1.0e-5,  # was -2e-5; scaled by Go2_peak_power/Boying_peak_power = 315.9/634.8
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=JOINT_NAMES)},
     )
     joint_torques_l2 = RewTerm(
         func=mdp.joint_torques_l2,
-        weight=-1e-4,
+        weight=-1.5e-5,  # was -1e-4; scaled by (23.4/60)^2 = 0.152 — Boying torque capacity 2.56x Go2
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=JOINT_NAMES)},
     )
     base_height_l2 = RewTerm(
@@ -394,7 +394,7 @@ class RewardsCfg:
     )
     feet_regulation = RewTerm(
         func=mdp.feet_regulation,
-        weight=-0.05,
+        weight=-0.16,  # was -0.05; scaled by (v_foot_go2/v_foot_by)^2 = (12.78/7.18)^2 = 3.17
         params={
             "base_height_target": BASE_HEIGHT_TARGET,
             "asset_cfg": SceneEntityCfg("robot", body_names=FOOT_LINK_NAME),
@@ -403,7 +403,7 @@ class RewardsCfg:
     )
     hip_pos_penalty_l1 = RewTerm(
         func=mdp.hip_pos_penalty_l1,
-        weight=-0.05,
+        weight=-0.077,  # was -0.05; scaled by hip_range_go2/hip_range_by = 1.047/0.681 = 1.538
         params={
             "command_name": "base_velocity",
             "asset_cfg": SceneEntityCfg("robot", joint_names=".*_hip_joint"),
@@ -445,7 +445,7 @@ class CurriculumCfg:
         "term_name": "lin_vel_z_l2", "initial_weight": -2.0, "final_weight": -0.0, "start_it": 0, "end_it": 1500,
     })
     base_height_l2 = CurrTerm(mdp.gradual_reward_weight_modification, params={
-        "term_name": "base_height_l2", "initial_weight": -1.0, "final_weight": -5.0, "start_it": 0, "end_it": 10000,
+        "term_name": "base_height_l2", "initial_weight": -1.0, "final_weight": -8.5, "start_it": 0, "end_it": 7000,
     })
 
 
