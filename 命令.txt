@@ -28,7 +28,7 @@ ok,现在我需要你做的,是把'/home/wkl/Desktop/himloco-by/go2_rl_robotlab'
 # libgomp：解决 aarch64 libgomp 符号冲突
 
 LD_PRELOAD="/lib/aarch64-linux-gnu/libgomp.so.1:/home/dream/miniconda3/envs/by_rl_robotlab/lib/python3.11/site-packages/torch/lib/libgomp.so.1:/usr/local/cuda/targets/sbsa-linux/lib/libnvrtc-builtins.so.13.0.88:/usr/local/cuda/targets/sbsa-linux/lib/libnvrtc.so.13.0.88" \
-python scripts/rsl_rl/train.py --task=RobotLab-Boying-v0 --headless --num_envs 8192
+python scripts/rsl_rl/train.py --task=RobotLab-Boying-v0 --headless --num_envs 4096
 
 LD_PRELOAD="/lib/aarch64-linux-gnu/libgomp.so.1:/home/dream/miniconda3/envs/by_rl_robotlab/lib/python3.11/site-packages/torch/lib/libgomp.so.1:/usr/local/cuda/targets/sbsa-linux/lib/libnvrtc-builtins.so.13.0.88:/usr/local/cuda/targets/sbsa-linux/lib/libnvrtc.so.13.0.88" \
 python scripts/rsl_rl/train.py --task=RobotLab-Go2-v0 --headless --num_envs 8192
@@ -45,3 +45,11 @@ pip install torch==2.7.0+cu128 torchvision torchaudio \
 python scripts/rsl_rl/play.py --task=RobotLab-Boying-v0
 
 修改点：配置Boying初始关节角对齐Go2；
+
+
+
+python scripts/rsl_rl/play.py --task=RobotLab-Boying-v0
+
+指定 checkpoint 运行：
+
+python scripts/rsl_rl/play.py --task=RobotLab-Boying-v0 --checkpoint=/home/wky/Music/wkl/moe-cts-by/logs/rsl_rl/boying_moe_cts/2026-07-05_02-12-36/model_61500.pt

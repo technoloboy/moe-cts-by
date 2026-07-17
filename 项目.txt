@@ -1,0 +1,294 @@
+项目概述：Go2 RL RobotLab
+
+  这是一个用于训练 宇树 Go2 四足机器人 步态控制的强化学习工程，核心算法是 MoE-CTS（Mixture of Experts + Concurrent Teacher-Student），已发表于 RSS
+  2026。
+
+  ---
+  核心算法：MoE-CTS
+
+  问题背景
+
+  机器人在真实部署时无法获取"特权信息"（如地形高度、接触力、精确线速度），但训练时可以。CTS（Concurrent Teacher-Student）的解决方案：
+
+  - Teacher（教师）：训练时使用完整特权信息，学一个好策略
+  - Student（学生）：只用可观测信息，同时被训练去模仿 Teacher
+
+  "Concurrent"的关键在于：Teacher 和 Student 同时训练，而不是先训好 Teacher 再蒸馏。
+
+  MoE 的加入
+
+  Student 编码器使用 混合专家（Mixture of Experts） 结构，能在不同运动模式（平地行走 vs 上楼梯等）之间自动切换专家。
+
+  source/rsl_rl/rsl_rl/networks/moe.py       ← MoE 网络结构
+  source/rsl_rl/rsl_rl/modules/actor_critic_moe_cts.py  ← 完整模型
+  source/rsl_rl/rsl_rl/algorithms/moe_cts.py             ← 训练算法
+
+  模型结构
+
+  观测输入（带历史帧）
+      ├── Policy obs（10帧历史，无特权信息）→ Student MoE Encoder → latent
+      └── Critic obs（单帧，含特权信息）  → Teacher MLP Encoder → latent
+
+  latent + single_obs → Actor MLP → 12个关节位置动作
+  latent + critic_obs → Critic MLP → 状态价值
+
+  训练时 75% 的并行环境用 Teacher，25% 用 Student，Student 的 loss = PPO loss + 向 Teacher latent 对齐的 L2 loss + MoE 负载均衡 loss。
+
+  ---
+  目录结构
+
+  source/
+    rsl_rl/          ← 定制化的 RL 库（PPO + MoECTS 算法）
+    robot_lab/       ← IsaacLab 环境定义（Go2 & Boying 机器人）
+
+  scripts/
+    rsl_rl/train.py  ← 训练入口
+    rsl_rl/play.py   ← 推理/评估入口
+
+  deploy/
+    deploy_mujoco/   ← MuJoCo Sim2Sim 部署脚本
+    pre_train/go2/   ← 预训练模型（.pt / .onnx）
+
+  resources/
+    go2/             ← Go2 的 URDF / MJCF 模型 + 场景 XML
+    boying_description/  ← 另一台机器人（Boying）的模型
+
+  ---
+  如何运行
+
+  1. 安装依赖
+
+  conda create -n go2_rl_robotlab python=3.11
+  conda activate go2_rl_robotlab
+  pip install isaaclab[isaacsim,all]==2.3.2.post1 --extra-index-url https://pypi.nvidia.com
+  pip install -U torch==2.7.0 torchvision==0.22.0 --index-url https://download.pytorch.org/whl/cu128
+  pip install -e source/robot_lab
+  pip install -e source/rsl_rl
+
+  2. 训练
+
+  python scripts/rsl_rl/train.py --task=RobotLab-Go2-v0 --headless
+
+  训练会在 IsaacLab 中并行运行 16384 个环境，每 500 步保存一次 checkpoint 到 outputs/ 目录。
+
+
+  4. MuJoCo Sim2Sim 部署
+
+  python scripts/rsl_rl/play.py --task=RobotLab-Go2-v0
+  4. MuJoCo Sim2Sim 部署
+
+  编辑 deploy/deploy_mujoco/configs/go2.yaml，设置 policy_path 指向训练好的 .pt 文件，然后：
+
+
+  编辑 deploy/deploy_mujoco/configs/go2.yaml，设置 policy_path 指向训练好的 .pt 文件，然后：
+
+  pip install mujoco pygame
+  python deploy/deploy_mujoco/deploy_go2.py
+
+
+  pip install mujoco pygame
+  python deploy/deploy_mujoco/deploy_go2.py
+
+  python deploy/deploy_mujoco/deploy_go2.py
+
+
+
+  4. MuJoCo Sim2Sim 部署
+
+  编辑 deploy/deploy_mujoco/configs/go2.yaml，设置 policy_path 指向训练好的 .pt 文件，然后：
+
+  编辑 deploy/deploy_mujoco/configs/go2.yaml，设置 policy_path 指向训练好的 .pt 文件，然后：
+
+  pip install mujoco pygame
+  python deploy/deploy_mujoco/deploy_go2.py
+
+  pip install mujoco pygame
+  python deploy/deploy_mujoco/deploy_go2.py
+
+  支持手柄控制（接手柄自动启用），左摇杆控制前进/横移，右摇杆控制转向。也可以在 yaml 里设置默认指令无需手柄。
+
+  pip install mujoco pygame
+  支持手柄控制（接手柄自动启用），左摇杆控制前进/横移，右摇杆控制转向。也可以在 yaml 里设置默认指令无需手柄。
+
+  ---
+  配置文件位置
+
+  ┌────────────────────────────┬────────────────────────────────────────────────────┐
+  │            配置            │                        文件                        │
+  ├────────────────────────────┼────────────────────────────────────────────────────┤
+  │ 环境（观测/奖励/域随机化） │ source/robot_lab/robot_lab/tasks/go2/env_cfg.py    │
+  ├────────────────────────────┼────────────────────────────────────────────────────┤
+  │ 算法超参数                 │ source/robot_lab/robot_lab/tasks/go2/rsl_rl_cfg.py │
+  配置文件位置
+
+  ┌────────────────────────────┬────────────────────────────────────────────────────┐
+  │            配置            │                        文件                        │
+  ├────────────────────────────┼────────────────────────────────────────────────────┤
+  │ 环境（观测/奖励/域随机化） │ source/robot_lab/robot_lab/tasks/go2/env_cfg.py    │
+  ├────────────────────────────┼────────────────────────────────────────────────────┤
+  │ 算法超参数                 │ source/robot_lab/robot_lab/tasks/go2/rsl_rl_cfg.py │
+  ├────────────────────────────┼────────────────────────────────────────────────────┤
+  │ MuJoCo 部署参数            │ deploy/deploy_mujoco/configs/go2.yaml              │
+  └────────────────────────────┴────────────────────────────────────────────────────┘
+  ┌────────────────────────────┬────────────────────────────────────────────────────┐
+  │            配置            │                        文件                        │
+  ├────────────────────────────┼────────────────────────────────────────────────────┤
+  │ 环境（观测/奖励/域随机化） │ source/robot_lab/robot_lab/tasks/go2/env_cfg.py    │
+  ├────────────────────────────┼────────────────────────────────────────────────────┤
+  │ 算法超参数                 │ source/robot_lab/robot_lab/tasks/go2/rsl_rl_cfg.py │
+  ├────────────────────────────┼────────────────────────────────────────────────────┤
+  │ MuJoCo 部署参数            │ deploy/deploy_mujoco/configs/go2.yaml              │
+  └────────────────────────────┴────────────────────────────────────────────────────┘
+  ├────────────────────────────┼────────────────────────────────────────────────────┤
+  │ 算法超参数                 │ source/robot_lab/robot_lab/tasks/go2/rsl_rl_cfg.py │
+  ├────────────────────────────┼────────────────────────────────────────────────────┤
+  │ MuJoCo 部署参数            │ deploy/deploy_mujoco/configs/go2.yaml              │
+  └────────────────────────────┴────────────────────────────────────────────────────┘
+  │ MuJoCo 部署参数            │ deploy/deploy_mujoco/configs/go2.yaml              │
+  └────────────────────────────┴────────────────────────────────────────────────────┘
+
+  ---
+  配置文件位置
+
+  ┌────────────────────────────┬────────────────────────────────────────────────────┐
+  │            配置            │                        文件                        │
+  ├────────────────────────────┼────────────────────────────────────────────────────┤
+  │ 环境（观测/奖励/域随机化） │ source/robot_lab/robot_lab/tasks/go2/env_cfg.py    │
+  ├────────────────────────────┼────────────────────────────────────────────────────┤
+  │ 算法超参数                 │ source/robot_lab/robot_lab/tasks/go2/rsl_rl_cfg.py │
+  ├────────────────────────────┼────────────────────────────────────────────────────┤
+  │ MuJoCo 部署参数            │ deploy/deploy_mujoco/configs/go2.yaml              │
+  └────────────────────────────┴────────────────────────────────────────────────────┘
+
+  env_cfg.py 里有很多可调参数：观测分为 policy（学生输入）、critic（教师特权信息）、single_obs（当前帧）三组，奖励包含速度跟踪、关节能耗、高度维持、
+  接触惩罚等十余项，域随机化覆盖质量、摩擦系数、推力扰动等。
+
+
+✻ Crunched for 1m 12s
+
+  env_cfg.py 里有很多可调参数：观测分为 policy（学生输入）、critic（教师特权信息）、single_obs（当前帧）三组，奖励包含速度跟踪、关节能耗、高度维持、
+  接触惩罚等十余项，域随机化覆盖质量、摩擦系数、推力扰动等。
+
+
+✻ Crunched for 1m 12s
+
+  编辑 deploy/deploy_mujoco/configs/go2.yaml，设置 policy_path 指向训练好的 .pt 文件，然后：
+
+  pip install mujoco pygame
+
+  ---
+  配置文件位置
+
+  ┌────────────────────────────┬────────────────────────────────────────────────────┐
+  │            配置            │                        文件                        │
+  ├────────────────────────────┼────────────────────────────────────────────────────┤
+  │ 环境（观测/奖励/域随机化） │ source/robot_lab/robot_lab/tasks/go2/env_cfg.py    │
+  ├────────────────────────────┼────────────────────────────────────────────────────┤
+  │ 算法超参数                 │ source/robot_lab/robot_lab/tasks/go2/rsl_rl_cfg.py │
+  ├────────────────────────────┼────────────────────────────────────────────────────┤
+  │ MuJoCo 部署参数            │ deploy/deploy_mujoco/configs/go2.yaml              │
+  └────────────────────────────┴────────────────────────────────────────────────────┘
+
+  env_cfg.py 里有很多可调参数：观测分为 policy（学生输入）、critic（教师特权信息）、single_obs（当前帧）三组，奖励包含速度跟踪、关节能耗、高度维持、
+  接触惩罚等十余项，域随机化覆盖质量、摩擦系数、推力扰动等。
+
+
+Part 2：MoE-CTS 算法详解
+  
+  A. 算法概述
+
+  CTS = Concurrent Teacher-Student（并发教师-学生）。
+
+  传统方法是两阶段的：先训练特权教师（能看到地形、接触力等完整信息），冻结后再训练学生模仿它的动作。缺点是串行、不高效。
+
+  CTS 的核心创新：教师和学生在同一次 rollout 里同时训练，教师用 PPO 优化，学生通过蒸馏损失学习匹配教师的隐变量表示，二者都接受真实奖励信号。MoE
+  是学生编码器的架构——用 8 个专家子网络处理不同地形/运动情境，通过门控网络软加权。
+
+  B. 网络架构
+
+  输入 → 编码 → 隐变量 → Actor（共享）→ 动作
+  ───────────────────────────────────────────────────────
+  TEACHER PATH（75% envs，有特权信息）：
+    critic obs [~263维: 线速度+角速度+重力+命令+关节状态+接触力+高度扫描]
+         │
+         ▼ Teacher Encoder: MLP(263→[512,256]→32) + L2Norm
+         │
+    latent_t (32维)
+         │
+         ├──▶ concat [latent_t, single_obs(45维)] → Actor MLP[512,256,128] → 12关节
+         └──▶ concat [latent_t.detach(), critic_obs] → Critic MLP → V(s)
+
+  STUDENT PATH（25% envs，只有可观测历史）：
+    policy obs [450维: 10帧历史×45维(角速度+重力+命令+关节位置速度+动作)]
+         │
+         ▼ MoE Encoder（8专家）：
+           门控网络: MLP(450→[512,256,256]→8) + Softmax → 权重(8)
+           专家网络: 共享backbone→8组独立head→8×32维
+           加权求和 + L2Norm → latent_s (32维)
+         │
+         ├──▶ concat [latent_s, single_obs(45)] → 同一个 Actor MLP → 12关节
+         └──▶ concat [latent_s.detach(), critic_obs] → 同一个 Critic MLP → V(s)
+
+  共享组件：Actor MLP、Critic MLP、动作噪声 std
+
+  single_obs = 当前时刻的 45 维 policy obs（history_length=1），给 Actor 提供"当前状态感知"，避免 Actor 只依赖压缩的隐变量。
+
+  C. 训练流程
+
+  Rollout 阶段：
+  - 16384 个 env 中，每 4 个里有 3 个是 teacher env，1 个是 student env（teacher_env_ratio=0.75）
+  - Teacher env：用特权 critic obs → Teacher Encoder → Actor → 采样动作
+  - Student env：用历史 policy obs → MoE Encoder → Actor（共享）→ 采样动作
+  - 两组都在真实环境中执行，都获得真实奖励
+
+  更新阶段（两次独立 pass）：
+
+  Pass 1 — PPO 更新（更新 teacher encoder + actor + critic）：
+  surrogate_loss(PPO) + value_loss + entropy_bonus
+  → optimizer 1 更新 teacher_encoder, actor, critic, std
+    (student MoE encoder 冻结，不参与)
+
+  Pass 2 — 学生蒸馏更新（只更新 student MoE encoder）：
+  latent_t = teacher_encoder(student_envs_critic_obs).detach()  # 目标，不反传
+  latent_s = student_moe_encoder(student_envs_policy_obs)
+
+  latent_loss = MSE(latent_t, latent_s)           # 核心蒸馏损失
+  load_balance_loss = MSE(专家使用率, 均匀分布)    # 防止专家塌陷
+  total = latent_loss + 0.01 × load_balance_loss
+
+  → optimizer 2 只更新 student_moe_encoder
+
+  D. 关键数值含义
+
+  训练日志中的两个特殊指标：
+
+  - mean_latent_loss：学生隐变量和教师隐变量之间的 MSE。下降表示学生编码器在成功学习教师的内部表示。
+  - mean_load_balance_loss：8 个专家的使用频率与均匀分布（1/8=12.5%）的偏差。接近 0 说明 8 个专家都在被使用，无坍塌。
+
+  E. 相对标准 PPO 的 5 大创新
+
+  1. 无两阶段训练——教师学生同步优化，教师随训练持续进化
+  2. 隐变量蒸馏而非动作蒸馏——学生学习教师的"感知方式"，迁移更稳健
+  3. MoE 学生编码器——8 个专家对不同地形/运动情境专门化，共享 Actor/Critic
+  4. 两个独立优化器——PPO 梯度不流过学生编码器，蒸馏梯度不影响 Actor/Critic，解耦稳定
+  5. 共享 Actor——强制教师和学生的隐空间兼容，蒸馏在隐空间成功即意味着动作一致
+
+  F. 配置参数解释
+
+  ┌─────────────────────────────┬───────────────┬─────────────────────────────────────────────────────────────┐
+  │            参数             │      值       │                            含义                             │
+  ├─────────────────────────────┼───────────────┼─────────────────────────────────────────────────────────────┤
+  │ expert_num                  │ 8             │ 8 个 MoE 专家，与 10 种地形匹配，允许多地形共享专家         │
+  ├─────────────────────────────┼───────────────┼─────────────────────────────────────────────────────────────┤
+  │ latent_dim                  │ 32            │ 隐变量维度，够小以强制压缩，够大以编码地形上下文            │
+  ├─────────────────────────────┼───────────────┼─────────────────────────────────────────────────────────────┤
+  │ norm_type                   │ l2norm        │ 投影到单位超球面，使 MSE 损失尺度不变，防止隐变量爆炸       │
+  ├─────────────────────────────┼───────────────┼─────────────────────────────────────────────────────────────┤
+  │ teacher_env_ratio           │ 0.75          │ 75% env 给教师，保证 PPO 采样质量；25% 给学生，提供蒸馏频率 │
+  ├─────────────────────────────┼───────────────┼─────────────────────────────────────────────────────────────┤
+  │ load_balance_coef           │ 0.01          │ 负载均衡权重很小，专家允许轻度专门化但不完全坍塌            │
+  ├─────────────────────────────┼───────────────┼─────────────────────────────────────────────────────────────┤
+  │ teacher_encoder_hidden_dims │ [512,256]     │ 2层，特权观测信息丰富无需更深                               │
+  ├─────────────────────────────┼───────────────┼─────────────────────────────────────────────────────────────┤
+  │ student_encoder_hidden_dims │ [512,256,256] │ 3层，历史观测难以压缩需要更深网络推理地形状态               │
+  └─────────────────────────────┴───────────────┴─────────────────────────────────────────────────────────────┘
