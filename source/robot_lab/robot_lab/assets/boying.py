@@ -76,7 +76,7 @@ BOYING_CFG = ArticulationCfg(
         ),
         "calf": EncosActuatorCfg_A6408P225(
             joint_names_expr=[".*_calf_joint"],  # 覆盖全部 4 个小腿关节
-            effort_limit=60.0,    # 峰值堵转扭矩 [Nm]（与髋/大腿相同）
+            effort_limit=90.0,    # 峰值堵转扭矩 [Nm]（与髋/大腿相同）
             velocity_limit=10.4,  # 小腿关节速度上限 [rad/s]（URDF 中 calf 限制，低于髋/大腿的 15.6）
             stiffness=60.0,       # PD 位置增益 Kp [Nm/rad]
             damping=4.5,          # PD 速度增益 Kd [Nm·s/rad]
