@@ -1,199 +1,281 @@
-项目概述：Go2 RL RobotLab
-
-  这是一个用于训练 宇树 Go2 四足机器人 步态控制的强化学习工程，核心算法是 MoE-CTS（Mixture of Experts + Concurrent Teacher-Student），已发表于 RSS
-  2026。
-
-  ---
-  核心算法：MoE-CTS
-
-  问题背景
-
-  机器人在真实部署时无法获取"特权信息"（如地形高度、接触力、精确线速度），但训练时可以。CTS（Concurrent Teacher-Student）的解决方案：
-
-  - Teacher（教师）：训练时使用完整特权信息，学一个好策略
-  - Student（学生）：只用可观测信息，同时被训练去模仿 Teacher
-
-  "Concurrent"的关键在于：Teacher 和 Student 同时训练，而不是先训好 Teacher 再蒸馏。
-
-  MoE 的加入
-
-  Student 编码器使用 混合专家（Mixture of Experts） 结构，能在不同运动模式（平地行走 vs 上楼梯等）之间自动切换专家。
-
-  source/rsl_rl/rsl_rl/networks/moe.py       ← MoE 网络结构
-  source/rsl_rl/rsl_rl/modules/actor_critic_moe_cts.py  ← 完整模型
-  source/rsl_rl/rsl_rl/algorithms/moe_cts.py             ← 训练算法
-
-  模型结构
-
-  观测输入（带历史帧）
-      ├── Policy obs（10帧历史，无特权信息）→ Student MoE Encoder → latent
-      └── Critic obs（单帧，含特权信息）  → Teacher MLP Encoder → latent
-
-  latent + single_obs → Actor MLP → 12个关节位置动作
-  latent + critic_obs → Critic MLP → 状态价值
-
-  训练时 75% 的并行环境用 Teacher，25% 用 Student，Student 的 loss = PPO loss + 向 Teacher latent 对齐的 L2 loss + MoE 负载均衡 loss。
+● boying 任务模块框架分析
 
   ---
   目录结构
-
-  source/
-    rsl_rl/          ← 定制化的 RL 库（PPO + MoECTS 算法）
-    robot_lab/       ← IsaacLab 环境定义（Go2 & Boying 机器人）
-
-  scripts/
-    rsl_rl/train.py  ← 训练入口
-    rsl_rl/play.py   ← 推理/评估入口
-
-  deploy/
-    deploy_mujoco/   ← MuJoCo Sim2Sim 部署脚本
-    pre_train/go2/   ← 预训练模型（.pt / .onnx）
-
-  resources/
-    go2/             ← Go2 的 URDF / MJCF 模型 + 场景 XML
-    boying_description/  ← 另一台机器人（Boying）的模型
-
-  ---
-  如何运行
-
-  1. 安装依赖
-
-  conda create -n go2_rl_robotlab python=3.11
-  conda activate go2_rl_robotlab
-  pip install isaaclab[isaacsim,all]==2.3.2.post1 --extra-index-url https://pypi.nvidia.com
-  pip install -U torch==2.7.0 torchvision==0.22.0 --index-url https://download.pytorch.org/whl/cu128
-  pip install -e source/robot_lab
-  pip install -e source/rsl_rl
-
-  2. 训练
-
-  python scripts/rsl_rl/train.py --task=RobotLab-Go2-v0 --headless
-
-  训练会在 IsaacLab 中并行运行 16384 个环境，每 500 步保存一次 checkpoint 到 outputs/ 目录。
-
-
-  4. MuJoCo Sim2Sim 部署
-
-  python scripts/rsl_rl/play.py --task=RobotLab-Go2-v0
-  4. MuJoCo Sim2Sim 部署
-
-  编辑 deploy/deploy_mujoco/configs/go2.yaml，设置 policy_path 指向训练好的 .pt 文件，然后：
-
-
-  编辑 deploy/deploy_mujoco/configs/go2.yaml，设置 policy_path 指向训练好的 .pt 文件，然后：
-
-  pip install mujoco pygame
-  python deploy/deploy_mujoco/deploy_go2.py
-
-
-  pip install mujoco pygame
-  python deploy/deploy_mujoco/deploy_go2.py
-
-  python deploy/deploy_mujoco/deploy_go2.py
-
-
-
-  4. MuJoCo Sim2Sim 部署
-
-  编辑 deploy/deploy_mujoco/configs/go2.yaml，设置 policy_path 指向训练好的 .pt 文件，然后：
-
-  编辑 deploy/deploy_mujoco/configs/go2.yaml，设置 policy_path 指向训练好的 .pt 文件，然后：
-
-  pip install mujoco pygame
-  python deploy/deploy_mujoco/deploy_go2.py
-
-  pip install mujoco pygame
-  python deploy/deploy_mujoco/deploy_go2.py
-
-  支持手柄控制（接手柄自动启用），左摇杆控制前进/横移，右摇杆控制转向。也可以在 yaml 里设置默认指令无需手柄。
-
-  pip install mujoco pygame
-  支持手柄控制（接手柄自动启用），左摇杆控制前进/横移，右摇杆控制转向。也可以在 yaml 里设置默认指令无需手柄。
+  
+  boying/
+  ├── __init__.py              # 包入口 & Gym 环境注册
+  ├── env_cfg.py               # 环境配置（场景、奖励、观测、事件等）
+  ├── rsl_rl_cfg.py            # RSL-RL 训练配置（MoE-CTS 算法）
+  │
+  ├── env/
+  │   ├── boying_env.py        # 自定义环境类
+  │   └── __init__.py
+  │
+  ├── manager/
+  │   ├── action_manager.py    # 自定义动作管理器（含历史缓冲）
+  │   └── __init__.py
+  │
+  └── mdp/
+      ├── __init__.py          # 重导出所有 MDP 组件
+      ├── rewards.py           # 奖励函数
+      ├── observations.py      # 观测函数
+      ├── events.py            # 随机化事件
+      ├── curriculums.py       # 课程学习
+      ├── commands.py          # 指令生成（含课程）
+      ├── terrains.py          # 地形定义
+      └── utils.py             # 工具函数
 
   ---
-  配置文件位置
+  各层职责与关系
+  
+  1. 入口层：__init__.py
 
-  ┌────────────────────────────┬────────────────────────────────────────────────────┐
-  │            配置            │                        文件                        │
-  ├────────────────────────────┼────────────────────────────────────────────────────┤
-  │ 环境（观测/奖励/域随机化） │ source/robot_lab/robot_lab/tasks/go2/env_cfg.py    │
-  ├────────────────────────────┼────────────────────────────────────────────────────┤
-  │ 算法超参数                 │ source/robot_lab/robot_lab/tasks/go2/rsl_rl_cfg.py │
-  配置文件位置
+  注册 Gymnasium 环境 RobotLab-Boying-v0，把三个核心对象绑定在一起：
 
-  ┌────────────────────────────┬────────────────────────────────────────────────────┐
-  │            配置            │                        文件                        │
-  ├────────────────────────────┼────────────────────────────────────────────────────┤
-  │ 环境（观测/奖励/域随机化） │ source/robot_lab/robot_lab/tasks/go2/env_cfg.py    │
-  ├────────────────────────────┼────────────────────────────────────────────────────┤
-  │ 算法超参数                 │ source/robot_lab/robot_lab/tasks/go2/rsl_rl_cfg.py │
-  ├────────────────────────────┼────────────────────────────────────────────────────┤
-  │ MuJoCo 部署参数            │ deploy/deploy_mujoco/configs/go2.yaml              │
-  └────────────────────────────┴────────────────────────────────────────────────────┘
-  ┌────────────────────────────┬────────────────────────────────────────────────────┐
-  │            配置            │                        文件                        │
-  ├────────────────────────────┼────────────────────────────────────────────────────┤
-  │ 环境（观测/奖励/域随机化） │ source/robot_lab/robot_lab/tasks/go2/env_cfg.py    │
-  ├────────────────────────────┼────────────────────────────────────────────────────┤
-  │ 算法超参数                 │ source/robot_lab/robot_lab/tasks/go2/rsl_rl_cfg.py │
-  ├────────────────────────────┼────────────────────────────────────────────────────┤
-  │ MuJoCo 部署参数            │ deploy/deploy_mujoco/configs/go2.yaml              │
-  └────────────────────────────┴────────────────────────────────────────────────────┘
-  ├────────────────────────────┼────────────────────────────────────────────────────┤
-  │ 算法超参数                 │ source/robot_lab/robot_lab/tasks/go2/rsl_rl_cfg.py │
-  ├────────────────────────────┼────────────────────────────────────────────────────┤
-  │ MuJoCo 部署参数            │ deploy/deploy_mujoco/configs/go2.yaml              │
-  └────────────────────────────┴────────────────────────────────────────────────────┘
-  │ MuJoCo 部署参数            │ deploy/deploy_mujoco/configs/go2.yaml              │
-  └────────────────────────────┴────────────────────────────────────────────────────┘
+  - 环境类 → BoyingEnv
+  - 环境配置 → BoyingEnvCfg
+  - 训练配置 → MoECTSRunnerCfg
 
   ---
-  配置文件位置
+  2. 配置层：env_cfg.py
+  
+  这是整个任务的"参数总表"，用 dataclass 描述全部配置：
 
-  ┌────────────────────────────┬────────────────────────────────────────────────────┐
-  │            配置            │                        文件                        │
-  ├────────────────────────────┼────────────────────────────────────────────────────┤
-  │ 环境（观测/奖励/域随机化） │ source/robot_lab/robot_lab/tasks/go2/env_cfg.py    │
-  ├────────────────────────────┼────────────────────────────────────────────────────┤
-  │ 算法超参数                 │ source/robot_lab/robot_lab/tasks/go2/rsl_rl_cfg.py │
-  ├────────────────────────────┼────────────────────────────────────────────────────┤
-  │ MuJoCo 部署参数            │ deploy/deploy_mujoco/configs/go2.yaml              │
-  └────────────────────────────┴────────────────────────────────────────────────────┘
-
-  env_cfg.py 里有很多可调参数：观测分为 policy（学生输入）、critic（教师特权信息）、single_obs（当前帧）三组，奖励包含速度跟踪、关节能耗、高度维持、
-  接触惩罚等十余项，域随机化覆盖质量、摩擦系数、推力扰动等。
-
-
-✻ Crunched for 1m 12s
-
-  env_cfg.py 里有很多可调参数：观测分为 policy（学生输入）、critic（教师特权信息）、single_obs（当前帧）三组，奖励包含速度跟踪、关节能耗、高度维持、
-  接触惩罚等十余项，域随机化覆盖质量、摩擦系数、推力扰动等。
-
-
-✻ Crunched for 1m 12s
-
-  编辑 deploy/deploy_mujoco/configs/go2.yaml，设置 policy_path 指向训练好的 .pt 文件，然后：
-
-  pip install mujoco pygame
+  ┌─────────────────┬──────────────────────────────────────────────────────┐
+  │     配置类      │                         职责                         │
+  ├─────────────────┼──────────────────────────────────────────────────────┤
+  │ BoyingSceneCfg  │ 场景：地形、机器人模型、传感器（高度扫描仪、接触力） │
+  ├─────────────────┼──────────────────────────────────────────────────────┤
+  │ CommandsCfg     │ 指令：使用 Go2RLGymCommandCfg，含速度范围            │
+  ├─────────────────┼──────────────────────────────────────────────────────┤
+  │ ActionsCfg      │ 动作：12 个关节位置控制（4腿×3关节）                 │
+  ├─────────────────┼──────────────────────────────────────────────────────┤
+  │ ObservationsCfg │ 观测组：Policy / Critic / SingleObs 三个组           │
+  ├─────────────────┼──────────────────────────────────────────────────────┤
+  │ EventCfg        │ 随机化：10+ 事件（质量、增益、摩擦、推力等）         │
+  ├─────────────────┼──────────────────────────────────────────────────────┤
+  │ RewardsCfg      │ 奖励：14 项奖励权重                                  │
+  ├─────────────────┼──────────────────────────────────────────────────────┤
+  │ TerminationsCfg │ 终止条件：超时 + 非法接触                            │
+  ├─────────────────┼──────────────────────────────────────────────────────┤
+  │ CurriculumCfg   │ 课程：地形难度、速度范围、基座高度                   │
+  ├─────────────────┼──────────────────────────────────────────────────────┤
+  │ BoyingEnvCfg    │ 主配置，组合以上所有子配置                           │
+  └─────────────────┴──────────────────────────────────────────────────────┘
 
   ---
-  配置文件位置
+  3. 环境层：env/boying_env.py
+  
+  在 Isaac Lab 的 ManagerBasedRLEnv 基础上做两处定制：
 
-  ┌────────────────────────────┬────────────────────────────────────────────────────┐
-  │            配置            │                        文件                        │
-  ├────────────────────────────┼────────────────────────────────────────────────────┤
-  │ 环境（观测/奖励/域随机化） │ source/robot_lab/robot_lab/tasks/go2/env_cfg.py    │
-  ├────────────────────────────┼────────────────────────────────────────────────────┤
-  │ 算法超参数                 │ source/robot_lab/robot_lab/tasks/go2/rsl_rl_cfg.py │
-  ├────────────────────────────┼────────────────────────────────────────────────────┤
-  │ MuJoCo 部署参数            │ deploy/deploy_mujoco/configs/go2.yaml              │
-  └────────────────────────────┴────────────────────────────────────────────────────┘
+  BoyingEnv
+  └── load_managers()  →  替换默认 ActionManager 为 ActionManagerGo2
 
-  env_cfg.py 里有很多可调参数：观测分为 policy（学生输入）、critic（教师特权信息）、single_obs（当前帧）三组，奖励包含速度跟踪、关节能耗、高度维持、
-  接触惩罚等十余项，域随机化覆盖质量、摩擦系数、推力扰动等。
+  ActionDelayBoyingEnv（继承 BoyingEnv）
+  └── step()           →  每步随机化每个环境的动作延迟
+                          使用 ActionManagerGo2WithDelay
+
+  核心动机：原生 IsaacLab 的 ActionManager 不保留历史动作，这里需要前两帧动作用于奖励计算。
+
+  ---
+  4. 管理器层：manager/action_manager.py
+
+  ActionManagerGo2
+  ├── _action           当前帧动作
+  ├── _prev_action      前1帧动作
+  └── _prev_prev_action 前2帧动作
+
+  ActionManagerGo2WithDelay（继承 ActionManagerGo2）
+  ├── update_action()             更新缓冲区
+  └── process_action_with_delay() 按延迟索引取历史动作
+
+  历史动作供 rewards.py 中的 action_smoothness_l2、action_rate_l2 等奖励函数使用。
+
+  ---
+  5. MDP 层：mdp/
+  
+  这是具体算法逻辑的核心，6个模块各司其职：
+
+  rewards.py — 奖励函数（~24个）
+
+  ┌──────────┬────────────────────────────────────────────────────────────┐
+  │   分组   │                            函数                            │
+  ├──────────┼────────────────────────────────────────────────────────────┤
+  │ 速度追踪 │ track_lin_vel_xy_exp, track_ang_vel_z_exp                  │
+  ├──────────┼────────────────────────────────────────────────────────────┤
+  │ 能量惩罚 │ joint_power, action_rate_l2, action_smoothness_l2          │
+  ├──────────┼────────────────────────────────────────────────────────────┤
+  │ 关节约束 │ joint_pos_penalty_l1, hip_pos_penalty_l1, joint_pos_limits │
+  ├──────────┼────────────────────────────────────────────────────────────┤
+  │ 对称性   │ joint_mirror, action_mirror, action_sync                   │
+  ├──────────┼────────────────────────────────────────────────────────────┤
+  │ 足端行为 │ feet_air_time, feet_regulation, feet_height, feet_slide 等 │
+  ├──────────┼────────────────────────────────────────────────────────────┤
+  │ 基座稳定 │ base_height_l2, flat_orientation_l2, upward                │
+  └──────────┴────────────────────────────────────────────────────────────┘
+
+  observations.py — 观测函数
+
+  - joint_pos_rel_without_wheel — 不含轮关节的相对关节位置
+  - phase — 步态相位（sin/cos 编码）
+  - joint_acc — 关节加速度
+  - foot_contact_force_norm — 接触力（含历史最大池化）
+
+  commands.py — 指令系统
+
+  Go2RLGymCommand 是整个指令生成的核心，包含：
+
+  - 三阶段速度课程：50k/100k 迭代时扩展速度范围
+  - 地形感知上限：17种地形各有不同的速度限制
+  - 动态重采样：基于累积位移决定何时重新采样
+  - 零速指令课程：训练早期强制静止
+
+  events.py — 域随机化
+
+  - 刚体惯量随机化
+  - 质心偏移随机化
+  - 带坑地形的初始位姿重置
+  - 动作偏移噪声
+
+  curriculums.py — 课程调度
+
+  - terrain_levels_vel_gym — 根据移动距离调整地形难度
+  - gradual_reward_weight_modification — 逐步调整奖励权重（如 base_height_l2 从 -1.0 → -8.5）
+  - command_curriculum — 动态扩展速度范围
+
+  terrains.py — 地形配置
+
+  11种子地形（波浪、斜坡、楼梯、障碍物等），禁用了 stepping_stones 和 gap。关键是自定义 PerSubTerrainSlopeThresholdGenerator，允许每个子地形单独设置
+  slope_threshold。
+
+  utils.py — 工具函数
+
+  - is_env_assigned_to_terrain / is_robot_on_terrain — 判断环境所在地形
+  - sample_disjoint_intervals — 从 [min, -bound] ∪ [bound, max] 采样（排除零速附近）
+  - _get_terrain_column_range — 按比例计算地形列范围
+
+  ---
+  依赖关系总图
+
+  __init__.py
+      ├── env_cfg.py
+      │       ├── mdp.*           (所有MDP组件)
+      │       └── assets.boying   (机器人URDF/关节配置)
+      ├── rsl_rl_cfg.py           (MoE-CTS网络/算法参数)
+      ├── env/boying_env.py
+      │       └── manager/action_manager.py
+      └── mdp/__init__.py
+              ├── rewards.py      ← 运行时访问 env.action_manager 取历史动作
+              ├── observations.py
+              ├── events.py
+              ├── curriculums.py  ← 依赖 commands.py 中的 CommandTerm
+              ├── commands.py     ← 依赖 utils.py（地形采样）
+              ├── terrains.py
+              └── utils.py
+
+  ---
+  关键设计模式
+  
+  1. 配置与逻辑分离 — env_cfg.py 只管参数，mdp/ 里是纯函数，env/ 才是运行时逻辑。
+  2. 动作历史注入 — 通过替换 ActionManager 绕过 IsaacLab 的限制，让奖励函数能访问历史动作。
+  3. 多阶段课程 — 指令范围、奖励权重、地形难度三条课程路线独立推进，由 CurriculumCfg 统一调度。
+  4. MoE-CTS 集成 — rsl_rl_cfg.py 配置 8个专家、32维隐空间、负载均衡系数 0.01，与 Isaac Lab 框架对接。
 
 
-Part 2：MoE-CTS 算法详解
+● source/rsl_rl 包含的算法全景
+  
+  整体架构
+
+  rsl_rl/
+  ├── algorithms/         # 训练算法
+  │   ├── ppo.py          # 标准 PPO
+  │   ├── distillation.py # 知识蒸馏
+  │   └── moe_cts.py      # MoE-CTS（本项目核心）
+  ├── modules/            # 神经网络策略
+  │   ├── actor_critic.py              # 标准 Actor-Critic（前馈）
+  │   ├── actor_critic_recurrent.py    # 循环 Actor-Critic（GRU/LSTM）
+  │   ├── actor_critic_cnn.py          # CNN Actor-Critic
+  │   ├── student_teacher.py           # 师生蒸馏网络
+  │   ├── student_teacher_recurrent.py # 循环师生蒸馏
+  │   ├── actor_critic_moe_cts.py      # MoE-CTS 策略网络（本项目核心）
+  │   ├── rnd.py                       # Random Network Distillation（探索）
+  │   └── symmetry.py                  # 对称性约束
+  ├── networks/           # 基础网络组件
+  │   ├── mlp.py          # 多层感知机
+  │   ├── cnn.py          # 卷积网络
+  │   ├── memory.py       # GRU/LSTM 记忆模块
+  │   ├── normalization.py # 经验归一化
+  │   └── moe.py          # MoE 组件（CatELU、L2Norm、Experts、MoE门控）
+  ├── storage/
+  │   ├── rollout_storage.py      # 标准 Rollout 缓冲区
+  │   └── rollout_storage_cts.py  # CTS 专用缓冲区（师生分离）
+  ├── runners/
+  │   ├── on_policy_runner.py      # 标准训练 Runner
+  │   ├── on_policy_runner_cts.py  # CTS 专用 Runner
+  │   └── distillation_runner.py   # 蒸馏 Runner
+  └── utils/
+      ├── logger.py        # Tensorboard/W&B/Neptune 日志
+      ├── logger_cts.py    # CTS 专用日志（师生分别统计）
+      ├── exporter_cts.py  # CTS 策略导出（JIT/ONNX）
+      └── utils.py         # 工具函数
+
+  ---
+  三条算法路线对比
+  
+  ┌──────────┬──────────────┬───────────────────────────────┬────────────────────┬───────────────────┐
+  │   路线   │    算法类    │           策略网络            │       Runner       │       存储        │
+  ├──────────┼──────────────┼───────────────────────────────┼────────────────────┼───────────────────┤
+  │ 标准 PPO │ PPO          │ ActorCritic / Recurrent / CNN │ OnPolicyRunner     │ RolloutStorage    │
+  ├──────────┼──────────────┼───────────────────────────────┼────────────────────┼───────────────────┤
+  │ 师生蒸馏 │ Distillation │ StudentTeacher / Recurrent    │ DistillationRunner │ RolloutStorage    │
+  ├──────────┼──────────────┼───────────────────────────────┼────────────────────┼───────────────────┤
+  │ MoE-CTS  │ MoECTS       │ ActorCriticMoECTS             │ OnPolicyRunnerCTS  │ RolloutStorageCTS │
+  └──────────┴──────────────┴───────────────────────────────┴────────────────────┴───────────────────┘
+
+  ---
+  MoE-CTS 被使用了吗？
+  
+  是的，完整贯穿整个训练链路，调用关系如下：
+
+  scripts/rsl_rl/train.py
+  │  检测 agent_cfg.class_name == "OnPolicyRunnerCTS"
+  └── OnPolicyRunnerCTS                     ← runners/on_policy_runner_cts.py
+          ├── MoECTS (算法)                 ← algorithms/moe_cts.py
+          │     ├── ActorCriticMoECTS       ← modules/actor_critic_moe_cts.py
+          │     │     ├── StudentMoEEncoder
+          │     │     │     └── MoE        ← networks/moe.py
+          │     │     │           ├── Experts（8个专家子网）
+          │     │     │           └── L2Norm / SimNorm（门控归一化）
+          │     │     ├── teacher_encoder（MLP）
+          │     │     ├── actor（MLP）
+          │     │     └── critic（MLP）
+          │     └── load_balance_coef=0.01  （负载均衡损失）
+          ├── RolloutStorageCTS             ← storage/rollout_storage_cts.py
+          │     （teacher_envs / student_envs 分离采样）
+          └── LoggerCTS                     ← utils/logger_cts.py
+
+  scripts/rsl_rl/play.py
+  └── OnPolicyRunnerCTS → export_cts_policy_as_jit / export_cts_policy_as_onnx
+
+  ---
+
+  ┌─────────────────────┬───────────────────┬─────────────────────────────────┐
+  │       字符串        │      实际类       │            定义文件             │
+  ├─────────────────────┼───────────────────┼─────────────────────────────────┤
+  │ "OnPolicyRunnerCTS" │ OnPolicyRunnerCTS │ runners/on_policy_runner_cts.py │
+  ├─────────────────────┼───────────────────┼─────────────────────────────────┤
+  │ "MoECTS"            │ MoECTS            │ algorithms/moe_cts.py           │
+  ├─────────────────────┼───────────────────┼─────────────────────────────────┤
+  │ "ActorCriticMoECTS" │ ActorCriticMoECTS │ modules/actor_critic_moe_cts.py │
+  ├─────────────────────┼───────────────────┼─────────────────────────────────┤
+  │ "cat_elu"           │ CatELU            │ networks/moe.py                 │
+  └─────────────────────┴───────────────────┴─────────────────────────────────┘
+
+  这些字符串写在 boying/rsl_rl_cfg.py 的配置类里，train.py 读取后按名查找并实例化，配置与实现完全解耦。
+
+
+● MoE-CTS 算法详解
   
   A. 算法概述
 

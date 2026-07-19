@@ -20,6 +20,7 @@ action_scale = 0.25
 # decimation: Number of control action updates @ sim DT per policy DT
 decimation = 4
 
+
 ok,现在我需要你做的,是把'/home/wkl/Desktop/himloco-by/go2_rl_robotlab'项目中的go2的整个训练算法(moe-cts)迁移到'/home/wkl/Desktop/himloco-by/himloco-boying'中,并且,训练环境从isa
   ac lab变换为mjlab,然后训练的机器人对象从go2变成boying,'/home/wkl/Desktop/himloco-by/himloco-boying/src/assets/robots/boying'配置不变,ok,请你理解我交给你的任务,然后列一份迁移清   
   单和迁移计划,注意是完全迁移过来,所有的配置全部相等对齐. 
@@ -42,12 +43,6 @@ pip install torch==2.7.0+cu128 torchvision torchaudio \
 # GPU GB10 = sm_121（Blackwell），torch cu128 wheel 只含 sm_120 的 libnvrtc.so.12
 # 系统 CUDA 13 的 libnvrtc.so.13 原生支持 sm_121，用 LD_PRELOAD 优先加载即可
 # cuda_arch_shim.so 和 TORCH_CUDA_ARCH_LIST 方案已废弃
-
-python scripts/rsl_rl/play.py --task=RobotLab-Boying-v0
-
-修改点：配置Boying初始关节角对齐Go2；
-
-
 
 python scripts/rsl_rl/play.py --task=RobotLab-Boying-v0
 
